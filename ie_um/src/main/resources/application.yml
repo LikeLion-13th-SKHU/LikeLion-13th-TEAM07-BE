@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    active: prod
+
+  datasource:
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: true
+
+swagger:
+  server:
+    local-url: ${swagger.server.local-url}
+    prod-url: ${swagger.server.prod-url}
