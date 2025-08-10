@@ -13,6 +13,9 @@ public class SwaggerConfig {
     @Value("${swagger.server.local-url}")
     private String localUrl;
 
+    @Value("${swagger.server.prod-url}")
+    private String prodUrl;
+
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
@@ -32,7 +35,10 @@ public class SwaggerConfig {
         return List.of(
                 new Server()
                         .url(localUrl)
-                        .description("Local development server")
+                        .description("Local development server"),
+                new Server()
+                        .url(prodUrl)
+                        .description("prod develop server")
         );
     }
 }
