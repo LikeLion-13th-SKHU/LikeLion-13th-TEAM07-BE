@@ -2,6 +2,8 @@ package com.example.ie_um.accompany.application;
 
 import com.example.ie_um.accompany.api.dto.request.AccompanyCreateReqDto;
 import com.example.ie_um.accompany.api.dto.request.AccompanyUpdateReqDto;
+import com.example.ie_um.accompany.api.dto.response.AccompanyApplyListResDto;
+import com.example.ie_um.accompany.api.dto.response.AccompanyApplyResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyListResDto;
 import com.example.ie_um.accompany.domain.Accompany;
@@ -85,16 +87,28 @@ public class AccompanyService {
         return getAccompanyListResDto(accompanyList);
     }
 
-    public AccompanyListResDto getApplied(Long memberId) {
+    public AccompanyApplyListResDto getApplied(Long memberId) {
         List<AccompanyStatus> statuses = Arrays.asList(AccompanyStatus.PENDING, AccompanyStatus.REJECTED);
 
         List<AccompanyMember> appliedMembers = accompanyMemberRepository.findByMemberIdAndAccompanyStatusIn(memberId, statuses);
 
-        List<Accompany> appliedGroups = appliedMembers.stream()
-                .map(AccompanyMember::getAccompany)
+        List<AccompanyApplyResDto> appliedGroupDtos = appliedMembers.stream()
+                .map(accompanyMember -> {
+                    Accompany accompany = accompanyMember.getAccompany();
+                    return AccompanyApplyResDto.builder()
+                            .id(accompany.getId())
+                            .title(accompany.getTitle())
+                            .content(accompany.getContent())
+                            .maxPersonnel(accompany.getMaxPersonnel())
+                            .currentPersonnel(accompany.getCurrentPersonnel())
+                            .time(accompany.getTime())
+                            .place(accompany.getPlace())
+                            .status(accompanyMember.getAccompanyStatus().getDescription())
+                            .build();
+                })
                 .toList();
 
-        return getAccompanyListResDto(appliedGroups);
+        return AccompanyApplyListResDto.from(appliedGroupDtos);
     }
 
     @Transactional

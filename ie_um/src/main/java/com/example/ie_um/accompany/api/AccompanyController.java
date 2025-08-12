@@ -2,6 +2,7 @@ package com.example.ie_um.accompany.api;
 
 import com.example.ie_um.accompany.api.dto.request.AccompanyCreateReqDto;
 import com.example.ie_um.accompany.api.dto.request.AccompanyUpdateReqDto;
+import com.example.ie_um.accompany.api.dto.response.AccompanyApplyListResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyListResDto;
 import com.example.ie_um.accompany.application.AccompanyService;
@@ -99,11 +100,11 @@ public class AccompanyController {
     @ApiResponse(
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = AccompanyListResDto.class)
+                    schema = @Schema(implementation = AccompanyApplyListResDto.class)
             )
     )
     @GetMapping("/apply/{memberId}")
-    public RspTemplate<AccompanyListResDto> getApplied(@PathVariable(value = "memberId") Long memberId) {
+    public RspTemplate<AccompanyApplyListResDto> getApplied(@PathVariable(value = "memberId") Long memberId) {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자가 신청한 동행그룹이 성공적으로 조회되었습니다.",
