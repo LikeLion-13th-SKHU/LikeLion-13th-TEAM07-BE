@@ -1,6 +1,6 @@
 package com.example.ie_um.accompany.api;
 
-import com.example.ie_um.accompany.api.dto.request.AccompanyReqDto;
+import com.example.ie_um.accompany.api.dto.request.AccompanyCreateReqDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyListResDto;
 import com.example.ie_um.accompany.application.AccompanyService;
@@ -26,8 +26,8 @@ public class AccompanyController {
             description = "동행그룹을 생성합니다."
     )
     @PostMapping("/{memberId}")
-    public RspTemplate<String> create(@PathVariable(value = "memberId") Long memberId, AccompanyReqDto accompanyReqDto) {
-         accompanyService.create(memberId, accompanyReqDto);
+    public RspTemplate<String> create(@PathVariable(value = "memberId") Long memberId, AccompanyCreateReqDto accompanyCreateReqDto) {
+         accompanyService.create(memberId, accompanyCreateReqDto);
          return new RspTemplate<>(
                  HttpStatus.CREATED,
                  "동행그룹이 성공적으로 생성되었습니다."
@@ -79,8 +79,8 @@ public class AccompanyController {
     @PutMapping("/{memberId}/{accompanyId}")
     public RspTemplate<String> update(@PathVariable(value = "memberId") Long memberId,
                                       @PathVariable(value = "accompanyId") Long accompanyId,
-                                      AccompanyReqDto accompanyReqDto) {
-        accompanyService.update(memberId, accompanyId, accompanyReqDto);
+                                      AccompanyCreateReqDto accompanyCreateReqDto) {
+        accompanyService.update(memberId, accompanyId, accompanyCreateReqDto);
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "동행그룹이 성공적으로 수정되었습니다."

@@ -1,6 +1,6 @@
 package com.example.ie_um.accompany.api.dto.request;
 
-public record AccompanyReqDto(
+public record AccompanyCreateReqDto(
         String title,
         String content,
         int maxPersonnel,

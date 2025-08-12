@@ -1,6 +1,7 @@
 package com.example.ie_um.accompany.application;
 
-import com.example.ie_um.accompany.api.dto.request.AccompanyReqDto;
+import com.example.ie_um.accompany.api.dto.request.AccompanyCreateReqDto;
+import com.example.ie_um.accompany.api.dto.request.AccompanyUpdateReqDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyListResDto;
 import com.example.ie_um.accompany.domain.Accompany;
@@ -27,17 +28,17 @@ public class AccompanyService {
     private final AccompanyMemberRepository accompanyMemberRepository;
 
     @Transactional
-    public void create(Long memberId, AccompanyReqDto accompanyReqDto) {
+    public void create(Long memberId, AccompanyCreateReqDto accompanyCreateReqDto) {
         // TODO: 로그인 한 사용자 정보 가져오기
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
         Accompany accompany = Accompany.builder()
-                .title(accompanyReqDto.title())
-                .content(accompanyReqDto.content())
-                .maxPersonnel(accompanyReqDto.maxPersonnel())
+                .title(accompanyCreateReqDto.title())
+                .content(accompanyCreateReqDto.content())
+                .maxPersonnel(accompanyCreateReqDto.maxPersonnel())
                 .currentPersonnel(1)
-                .time(accompanyReqDto.time())
-                .place(accompanyReqDto.place())
+                .time(accompanyCreateReqDto.time())
+                .place(accompanyCreateReqDto.place())
                 .build();
 
         AccompanyMember accompanyMember = AccompanyMember.builder()
@@ -80,15 +81,15 @@ public class AccompanyService {
     }
 
     @Transactional
-    public void update(Long memberId, Long accompanyId, AccompanyReqDto accompanyReqDto) {
+    public void update(Long memberId, Long accompanyId, AccompanyUpdateReqDto accompanyUpdateReqDto) {
         Accompany accompany = validateOwnerAndGetAccompany(memberId, accompanyId);
 
-        accompany.update(accompanyReqDto.title(),
-                accompanyReqDto.content(),
-                accompanyReqDto.maxPersonnel(),
-                accompanyReqDto.currentPersonnel(),
-                accompanyReqDto.time(),
-                accompanyReqDto.place());
+        accompany.update(accompanyUpdateReqDto.title(),
+                accompanyUpdateReqDto.content(),
+                accompanyUpdateReqDto.maxPersonnel(),
+                accompanyUpdateReqDto.currentPersonnel(),
+                accompanyUpdateReqDto.time(),
+                accompanyUpdateReqDto.place());
     }
 
     @Transactional
