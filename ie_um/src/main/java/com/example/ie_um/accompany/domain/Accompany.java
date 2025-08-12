@@ -52,4 +52,12 @@ public class Accompany extends BaseTimeEntity {
         this.time = time;
         this.place = place;
     }
+
+    public void increaseCurrentPersonnel() {
+        currentPersonnel++;
+    }
+
+    public void decreaseCurrentPersonnel() {
+        currentPersonnel--;
+    }
 }

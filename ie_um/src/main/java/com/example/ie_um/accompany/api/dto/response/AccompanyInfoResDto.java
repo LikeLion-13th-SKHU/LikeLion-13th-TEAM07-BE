@@ -4,11 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record AccompanyInfoResDto(
+        Long id,
         String title,
         String content,
         int maxPersonnel,
         int currentPersonnel,
-        boolean isOwner,
         String time,
         String place
 ) {
