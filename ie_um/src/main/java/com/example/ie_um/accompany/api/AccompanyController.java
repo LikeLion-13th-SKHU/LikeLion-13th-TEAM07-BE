@@ -74,6 +74,44 @@ public class AccompanyController {
     }
 
     @Operation(
+            summary = "나의 동행그룹 조회",
+            description = "사용자가 포함된 동행그룹을 조회합니다."
+    )
+    @ApiResponse(
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AccompanyListResDto.class)
+            )
+    )
+    @GetMapping("/member/{memberId}")
+    public RspTemplate<AccompanyListResDto> getByMemberId(@PathVariable(value = "memberId") Long memberId) {
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "사용자가 포함된 동행그룹이 성공적으로 조회되었습니다.",
+                accompanyService.getByMemberId(memberId)
+        );
+    }
+
+    @Operation(
+            summary = "신청한 동행그룹 조회",
+            description = "사용자가 신청한 동행그룹을 조회합니다."
+    )
+    @ApiResponse(
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AccompanyListResDto.class)
+            )
+    )
+    @GetMapping("/apply/{memberId}")
+    public RspTemplate<AccompanyListResDto> getApplied(@PathVariable(value = "memberId") Long memberId) {
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "사용자가 신청한 동행그룹이 성공적으로 조회되었습니다.",
+                accompanyService.getApplied(memberId)
+        );
+    }
+
+    @Operation(
             summary = "동행그룹 수정",
             description = "동행그룹을 수정합니다."
     )

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -71,18 +72,29 @@ public class AccompanyService {
 
     public AccompanyListResDto getAll() {
         List<Accompany> accompanyList = accompanyRepository.findAll();
-        List<AccompanyInfoResDto> accompanyListResDtoList = accompanyList.stream()
-                .map(accompany -> AccompanyInfoResDto.builder()
-                        .id(accompany.getId())
-                        .title(accompany.getTitle())
-                        .content(accompany.getContent())
-                        .maxPersonnel(accompany.getMaxPersonnel())
-                        .currentPersonnel(accompany.getCurrentPersonnel())
-                        .time(accompany.getTime())
-                        .place(accompany.getPlace())
-                        .build())
+        return getAccompanyListResDto(accompanyList);
+    }
+
+    public AccompanyListResDto getByMemberId(Long memberId) {
+        List<AccompanyMember> accompanyMembers = accompanyMemberRepository.findByMemberIdAndAccompanyStatus(memberId, AccompanyStatus.ACCEPTED);
+
+        List<Accompany> accompanyList = accompanyMembers.stream()
+                .map(AccompanyMember::getAccompany)
                 .toList();
-        return AccompanyListResDto.from(accompanyListResDtoList);
+
+        return getAccompanyListResDto(accompanyList);
+    }
+
+    public AccompanyListResDto getApplied(Long memberId) {
+        List<AccompanyStatus> statuses = Arrays.asList(AccompanyStatus.PENDING, AccompanyStatus.REJECTED);
+
+        List<AccompanyMember> appliedMembers = accompanyMemberRepository.findByMemberIdAndAccompanyStatusIn(memberId, statuses);
+
+        List<Accompany> appliedGroups = appliedMembers.stream()
+                .map(AccompanyMember::getAccompany)
+                .toList();
+
+        return getAccompanyListResDto(appliedGroups);
     }
 
     @Transactional
@@ -100,7 +112,7 @@ public class AccompanyService {
     @Transactional
     public void leave(Long memberId, Long accompanyId) {
         AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("해당 동행 그룹에 참여하지 않았습니다."));
+                .orElseThrow(() -> new AccompanyInvalidGroupException("해당 동행 그룹의 참가자가 아닙니다."));
 
         if (accompanyMember.getAccompanyStatus() != AccompanyStatus.ACCEPTED) {
             throw new AccompanyInvalidGroupException("이미 그룹에 속해있지 않습니다.");
@@ -115,17 +127,6 @@ public class AccompanyService {
             accompanyMemberRepository.delete(accompanyMember);
             accompany.decreaseCurrentPersonnel();
         }
-    }
-
-    private Accompany validateOwnerAndGetAccompany(Long memberId, Long accompanyId) {
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("해당 동행 그룹에 참여하지 않았습니다."));
-
-        if (!accompanyMember.isOwner()) {
-            throw new AccompanyInvalidGroupException("동행그룹 생성자만 수정/삭제할 수 있습니다.");
-        }
-
-        return accompanyMember.getAccompany();
     }
 
     @Transactional
@@ -201,11 +202,34 @@ public class AccompanyService {
     }
 
     private void validateOwner(Long memberId, Long accompanyId) {
-        AccompanyMember ownerMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
+        validateOwnerAndGetAccompany(memberId, accompanyId);
+    }
+
+
+    private Accompany validateOwnerAndGetAccompany(Long memberId, Long accompanyId) {
+        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
                 .orElseThrow(() -> new AccompanyInvalidGroupException("해당 동행 그룹에 참여하지 않았습니다."));
 
-        if (!ownerMember.isOwner()) {
-            throw new AccompanyInvalidGroupException("동행그룹 생성자만 이 기능을 사용할 수 있습니다.");
+        if (!accompanyMember.isOwner()) {
+            throw new AccompanyInvalidGroupException("동행그룹 생성자만 수정/삭제할 수 있습니다.");
         }
+
+        return accompanyMember.getAccompany();
+    }
+
+    private AccompanyListResDto getAccompanyListResDto(List<Accompany> appliedGroups) {
+        List<AccompanyInfoResDto> appliedGroupDtos = appliedGroups.stream()
+                .map(accompany -> AccompanyInfoResDto.builder()
+                        .id(accompany.getId())
+                        .title(accompany.getTitle())
+                        .content(accompany.getContent())
+                        .maxPersonnel(accompany.getMaxPersonnel())
+                        .currentPersonnel(accompany.getCurrentPersonnel())
+                        .time(accompany.getTime())
+                        .place(accompany.getPlace())
+                        .build())
+                .toList();
+
+        return AccompanyListResDto.from(appliedGroupDtos);
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 @Builder
 public record AccompanyListResDto(
-        List<AccompanyInfoResDto> accompanyInfoResDtoList
+        List<AccompanyInfoResDto> accompanyInfoResDtos
 ) {
     public static AccompanyListResDto from(List<AccompanyInfoResDto> accompanyInfoResDtoList) {
         return new AccompanyListResDto(accompanyInfoResDtoList);
