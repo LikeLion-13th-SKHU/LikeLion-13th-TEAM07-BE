@@ -1,6 +1,6 @@
 package com.example.ie_um.global.config;
 
-import com.example.ie_um.domain.user.service.CustomOAuth2UserService;
+import com.example.ie_um.domain.member.service.CustomOAuth2UserService;
 import com.example.ie_um.global.config.jwt.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,7 @@
 package com.example.ie_um.accompany.domain;
 
+import com.example.ie_um.domain.member.entity.Member;
 import com.example.ie_um.global.entity.BaseTimeEntity;
-import com.example.ie_um.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
