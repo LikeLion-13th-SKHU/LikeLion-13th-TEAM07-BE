@@ -28,7 +28,8 @@ public class AccompanyController {
             description = "동행그룹을 생성합니다."
     )
     @PostMapping("/{memberId}")
-    public RspTemplate<String> create(@PathVariable(value = "memberId") Long memberId, @RequestBody AccompanyCreateReqDto accompanyCreateReqDto) {
+    public RspTemplate<String> create(@PathVariable(value = "memberId") Long memberId,
+                                      @RequestBody AccompanyCreateReqDto accompanyCreateReqDto) {
          accompanyService.create(memberId, accompanyCreateReqDto);
          return new RspTemplate<>(
                  HttpStatus.CREATED,
