@@ -19,8 +19,8 @@ public class Member {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+//    @Column(name = "password", nullable = false)
+//    private String password;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -33,9 +33,9 @@ public class Member {
     private Gender gender;
 
     @Builder
-    private Member(String email, String password, String name, String nickName,  Gender gender) {
+    private Member(String email, String name, String nickName,  Gender gender) {
         this.email = email;
-        this.password = password;
+//        this.password = password;
         this.name = name;
         this.nickName = nickName;
         this.gender = gender;

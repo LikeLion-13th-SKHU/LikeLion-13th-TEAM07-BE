@@ -1,5 +1,6 @@
 package com.example.ie_um.auth.application;
 
+import com.example.ie_um.member.domain.Gender;
 import com.example.ie_um.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import com.example.ie_um.auth.userInfo.OAuthUserInfo;
@@ -73,6 +74,8 @@ public class OAuthService {
                         Member.builder()
                                 .email(userInfo.getEmail())
                                 .name(userInfo.getName())
+                                .nickName("")
+                                .gender(Gender.UNKNOWN)
                                 .build()
                 ));
 

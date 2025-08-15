@@ -1,5 +1,6 @@
 package com.example.ie_um.auth.client;
 
+import com.example.ie_um.auth.api.dto.KakaoTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,6 +19,8 @@ public class KakaoOAuthClient {
 
     @Value("${oauth.kakao.client-id}")
     private String clientId;
+    @Value("${oauth.kakao.client-secret}") // yml 파일에 client-secret 추가
+    private String clientSecret;
     @Value("${oauth.kakao.redirect-uri}")
     private String redirectUri;
 
@@ -34,20 +37,20 @@ public class KakaoOAuthClient {
         params.add("client_id", clientId);
         params.add("redirect_uri", redirectUri);
         params.add("grant_type", "authorization_code");
+        params.add("client_secret", clientSecret);
 
-        Map<String, Object> response = webClient.post()
+        KakaoTokenResponse response = webClient.post()
                 .uri("https://kauth.kakao.com/oauth/token")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .bodyValue(params)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
+                .bodyToMono(KakaoTokenResponse.class) // ◀ DTO 클래스로 바로 매핑
                 .block();
 
-        if (response == null || !response.containsKey("id_token")) {
-            throw new IllegalArgumentException("Kakao ID 토큰을 가져오지 못했습니다. 응답: " + response);
+        if (response == null || response.idToken() == null) {
+            throw new IllegalArgumentException("Kakao ID 토큰을 가져오지 못했습니다.");
         }
 
-        return response.get("id_token").toString();
+        return response.idToken();
     }
 }

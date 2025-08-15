@@ -26,6 +26,7 @@ swagger:
 oauth:
   kakao:
     client-id: ${oauth.kakao.client-id}
+    client-secret: ${oauth.kakao.client-secret}
     redirect-uri: ${oauth.kakao.redirect-uri}
     token-uri: ${oauth.kakao.token-uri}
     user-info-uri: ${oauth.kakao.user-info-uri}
