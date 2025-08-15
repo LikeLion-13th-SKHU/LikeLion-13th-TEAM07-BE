@@ -1,4 +1,4 @@
-package com.example.ie_um.domain.user.entity;
+package com.example.ie_um.domain.member.entity;
 
 public enum LoginType {
     NAVER,
