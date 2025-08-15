@@ -17,6 +17,8 @@ import com.example.ie_um.accompany.exception.AccompanyPersonnelInvalidGroupExcep
 import com.example.ie_um.member.domain.Member;
 import com.example.ie_um.member.exception.MemberNotFoundException;
 import com.example.ie_um.member.repository.MemberRepository;
+import com.example.ie_um.resource.api.dto.response.ResourceResDto;
+import com.example.ie_um.resource.domain.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,13 +39,22 @@ public class AccompanyService {
         // TODO: 로그인 한 사용자 정보 가져오기
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
+
+        Resource resource = Resource.builder()
+                .name(accompanyCreateReqDto.name())
+                .description(accompanyCreateReqDto.description())
+                .address(accompanyCreateReqDto.address())
+                .latitude(accompanyCreateReqDto.latitude())
+                .longitude(accompanyCreateReqDto.longitude())
+                .build();
+
         Accompany accompany = Accompany.builder()
                 .title(accompanyCreateReqDto.title())
                 .content(accompanyCreateReqDto.content())
                 .maxPersonnel(accompanyCreateReqDto.maxPersonnel())
                 .currentPersonnel(1)
                 .time(accompanyCreateReqDto.time())
-                .place(accompanyCreateReqDto.place())
+                .place(resource)
                 .build();
 
         AccompanyMember accompanyMember = AccompanyMember.builder()
@@ -61,6 +72,16 @@ public class AccompanyService {
         Accompany accompany = accompanyRepository.findById(accompanyId)
                 .orElseThrow(() -> new AccompanyNotFoundException("동행 그룹을 찾을 수 없습니다."));
 
+        Resource resource = accompany.getPlace();
+
+        ResourceResDto resourceResDto = ResourceResDto.builder()
+                .name(resource.getName())
+                .description(resource.getDescription())
+                .address(resource.getAddress())
+                .latitude(resource.getLatitude())
+                .longitude(resource.getLongitude())
+                .build();
+
         return AccompanyInfoResDto.builder()
                 .id(accompany.getId())
                 .title(accompany.getTitle())
@@ -68,7 +89,7 @@ public class AccompanyService {
                 .maxPersonnel(accompany.getMaxPersonnel())
                 .currentPersonnel(accompany.getCurrentPersonnel())
                 .time(accompany.getTime())
-                .place(accompany.getPlace())
+                .place(resourceResDto)
                 .build();
     }
 
@@ -102,7 +123,7 @@ public class AccompanyService {
                             .maxPersonnel(accompany.getMaxPersonnel())
                             .currentPersonnel(accompany.getCurrentPersonnel())
                             .time(accompany.getTime())
-                            .place(accompany.getPlace())
+                            .place(getResourceResDto(accompany.getPlace()))
                             .status(accompanyMember.getAccompanyStatus().getDescription())
                             .build();
                 })
@@ -119,8 +140,7 @@ public class AccompanyService {
                 accompanyUpdateReqDto.content(),
                 accompanyUpdateReqDto.maxPersonnel(),
                 accompanyUpdateReqDto.currentPersonnel(),
-                accompanyUpdateReqDto.time(),
-                accompanyUpdateReqDto.place());
+                accompanyUpdateReqDto.time());
     }
 
     @Transactional
@@ -240,10 +260,20 @@ public class AccompanyService {
                         .maxPersonnel(accompany.getMaxPersonnel())
                         .currentPersonnel(accompany.getCurrentPersonnel())
                         .time(accompany.getTime())
-                        .place(accompany.getPlace())
+                        .place(getResourceResDto(accompany.getPlace()))
                         .build())
                 .toList();
 
         return AccompanyListResDto.from(appliedGroupDtos);
+    }
+
+    private ResourceResDto getResourceResDto(Resource resource) {
+        return ResourceResDto.builder()
+                .name(resource.getName())
+                .description(resource.getDescription())
+                .address(resource.getAddress())
+                .latitude(resource.getLatitude())
+                .longitude(resource.getLongitude())
+                .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.example.ie_um.accompany.api.dto.response;
 
+import com.example.ie_um.resource.api.dto.response.ResourceResDto;
 import lombok.Builder;
 
 @Builder
@@ -10,6 +11,6 @@ public record AccompanyInfoResDto(
         int maxPersonnel,
         int currentPersonnel,
         String time,
-        String place
+        ResourceResDto place
 ) {
 }

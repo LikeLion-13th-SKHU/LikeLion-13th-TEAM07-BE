@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: prod
+    active: local
 
   datasource:
     url: ${spring.datasource.url}
@@ -34,3 +34,7 @@ oauth:
 jwt:
   secret: ${jwt.secret}
   expiry: ${jwt.expiry}
+
+ai:
+  server:
+    url: ${ai.server.url}
