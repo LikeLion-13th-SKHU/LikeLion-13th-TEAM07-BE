@@ -51,6 +51,7 @@ public class OAuth2Attributes {
                 .build();
     }
 
+    // 소셜 로그인 타입에 따라 적절한 파싱 메서드를 호출하는 팩토리 메서드
     public static OAuth2Attributes of(LoginType loginType, String userNameAttributeName, Map<String, Object> attributes) {
         if (loginType == LoginType.NAVER) {
             return ofNaver(userNameAttributeName, attributes);
