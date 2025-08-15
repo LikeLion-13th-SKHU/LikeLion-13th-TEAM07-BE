@@ -25,7 +25,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // --- 기존 리다이렉트 로직 주석 처리 ---
         /*
         // 2. 토큰을 포함한 리다이렉트 URL 생성
-        String redirectUrl = UriComponentsBuilder.fromUriString("https://ieum-api.duckdns.org/login/oauth2/success")
+        String redirectUrl = UriComponentsBuilder.fromUriString("https://ieum-api.duckdns.org")
                 .queryParam("token", token)
                 .build().toUriString();
 
