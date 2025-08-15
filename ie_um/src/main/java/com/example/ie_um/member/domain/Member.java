@@ -1,4 +1,4 @@
-package com.example.ie_um.domain.member.entity;
+package com.example.ie_um.member.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,9 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
 public class Member {
 
     @Id
@@ -25,10 +25,6 @@ public class Member {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "login_type", nullable = false)
-    private LoginType loginType;
-
     @Column(name = "nickName", nullable = false, unique = true)
     private String nickName;
 
@@ -37,11 +33,10 @@ public class Member {
     private Gender gender;
 
     @Builder
-    private Member(String email, String password, String name, LoginType loginType, String nickName, Gender gender) {
+    private Member(String email, String password, String name, String nickName,  Gender gender) {
         this.email = email;
         this.password = password;
         this.name = name;
-        this.loginType = loginType;
         this.nickName = nickName;
         this.gender = gender;
     }

@@ -1,4 +1,4 @@
-package com.example.ie_um.domain.member.exception;
+package com.example.ie_um.member.exception;
 
 import com.example.ie_um.global.error.exception.NotFoundGroupException;
 
