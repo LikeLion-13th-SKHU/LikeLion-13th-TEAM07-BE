@@ -1,9 +1,10 @@
-package com.example.ie_um.domain.user.service;
+package com.example.ie_um.domain.member.service;
 
-import com.example.ie_um.domain.user.dto.OAuth2Attributes;
-import com.example.ie_um.domain.user.entity.LoginType;
-import com.example.ie_um.domain.user.entity.Member;
-import com.example.ie_um.domain.user.repository.MemberRepository;
+import com.example.ie_um.domain.member.dto.OAuth2Attributes;
+import com.example.ie_um.domain.member.entity.Gender;
+import com.example.ie_um.domain.member.entity.LoginType;
+import com.example.ie_um.domain.member.entity.Member;
+import com.example.ie_um.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -49,7 +50,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Member member;
         if (optionalMember.isPresent()) {
             member = optionalMember.get();
-            member.update(attributes.getName(), attributes.getNickName(), attributes.getGender());
+            Gender gender = Gender.valueOf(attributes.getGender().toUpperCase());
+            member.update(attributes.getName(), attributes.getNickName(), gender);
         } else {
             member = attributes.toEntity(loginType);
         }

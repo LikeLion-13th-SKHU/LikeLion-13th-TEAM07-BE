@@ -1,6 +1,6 @@
 package com.example.ie_um.global.config;
 
-import com.example.ie_um.domain.user.service.CustomOAuth2UserService;
+import com.example.ie_um.domain.member.service.CustomOAuth2UserService;
 import com.example.ie_um.global.config.jwt.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +22,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/login/oauth2/success").permitAll()
+                        // ✅ /login 경로와 스웨거 관련 전체 경로를 permitAll에 추가
+                        .requestMatchers(
+                                "/", "/css/**", "/images/**", "/js/**",
+                                "/login/oauth2/success", "/login",
+                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**",
+                                "/oauth2/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
