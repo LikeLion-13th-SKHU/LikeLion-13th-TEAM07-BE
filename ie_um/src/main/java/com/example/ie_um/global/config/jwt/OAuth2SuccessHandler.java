@@ -23,7 +23,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtTokenProvider.generateToken(authentication);
 
         // 2. 토큰을 포함한 리다이렉트 URL 생성
-        String redirectUrl = UriComponentsBuilder.fromUriString("https://ieum-api.duckdns.org/login/oauth2/success")
+        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/login/oauth2/success")
                 .queryParam("token", token)
                 .build().toUriString();
 

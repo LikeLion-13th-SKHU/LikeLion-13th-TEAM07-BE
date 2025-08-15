@@ -1,11 +1,14 @@
 package com.example.ie_um.global.config.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
@@ -36,28 +39,32 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
-                .setSubject(email) // 토큰의 주체
-                .setIssuedAt(now) // 발급 시간
-                .setExpiration(expiryDate) // 만료 시간
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512) // 서명
+                .subject(email)                 // setSubject() → subject()
+                .issuedAt(now)                   // setIssuedAt() → issuedAt()
+                .expiration(expiryDate)          // setExpiration() → expiration()
+                .signWith(getSigningKey(), Jwts.SIG.HS512) // SignatureAlgorithm.HS512 → Jwts.SIG.HS512
                 .compact();
     }
 
     // JWT 토큰에서 이메일 추출
     public String getUserEmailFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims = Jwts.parser()                           // parserBuilder() → parser()
+                .verifyWith(getSigningKey())                    // setSigningKey() → verifyWith()
+                .build()
+                .parseSignedClaims(token)                       // parseClaimsJws() → parseSignedClaims()
+                .getPayload();                                  // getBody() → getPayload()
         return claims.getSubject();
     }
 
     // JWT 토큰 유효성 검증
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(authToken);
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(authToken);
             return true;
-        } catch (SignatureException ex) {
+        } catch (io.jsonwebtoken.security.SignatureException ex) {
             log.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
             log.error("Invalid JWT token");
