@@ -49,12 +49,13 @@ public class SwaggerConfig {
 
     private List<Server> servers() {
         return List.of(
-                new Server()
-                        .url(localUrl)
-                        .description("Local development server"),
+
                 new Server()
                         .url(prodUrl)
-                        .description("prod develop server")
+                        .description("prod develop server"),
+                new Server()
+                        .url(localUrl)
+                        .description("Local development server")
         );
     }
 }
