@@ -7,52 +7,45 @@ import com.example.ie_um.auth.userInfo.OAuthUserInfo;
 import com.example.ie_um.auth.userInfo.UserInfo;
 import com.example.ie_um.auth.client.KakaoOAuthClient;
 import com.example.ie_um.auth.exception.OAuthLoginFailedException;
-import com.example.ie_um.auth.exception.UnsupportedProviderException;
 import com.example.ie_um.global.jwt.JwtProvider;
 import com.example.ie_um.global.jwt.dto.TokenDto;
 import com.example.ie_um.member.domain.Member;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OAuthService {
+
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
     private final KakaoOAuthClient kakaoOAuthClient;
 
-    public String buildAuthUrl(String provider) {
-        return switch (provider) {
-            case "kakao" -> kakaoOAuthClient.getAuthUrl();
-            default -> throw new IllegalArgumentException("지원하지 않는 provider: " + provider);
-        };
+    public String buildAuthUrl() {
+        return kakaoOAuthClient.getAuthUrl();
     }
 
     @Transactional
-    public TokenDto handleOAuthLogin(String provider, String code) {
-        String idToken = getIdToken(provider, code);
-        UserInfo claims = parserIdTokne(idToken);
-        OAuthUserInfo userInfo = getUserInfo(provider, claims);
-        Member member = getOrCreateMember(userInfo, provider);
+    public TokenDto handleOAuthLogin(String code) {
+        String idToken = getIdToken(code);
+        UserInfo claims = parseIdToken(idToken);
+        OAuthUserInfo userInfo = getUserInfo(claims);
+        Member member = getOrCreateMember(userInfo);
         String token = jwtProvider.createToken(member.getEmail(), member.getId());
         return new TokenDto(token);
     }
 
-    private String getIdToken(String provider, String code) {
+    private String getIdToken(String code) {
         try {
-            return switch (provider) {
-                case "kakao" -> kakaoOAuthClient.getIdToken(code);
-                default -> throw new UnsupportedProviderException(provider);
-            };
+            return kakaoOAuthClient.getIdToken(code);
         } catch (Exception e) {
             throw new OAuthLoginFailedException(e.getMessage());
         }
     }
 
-    private UserInfo parserIdTokne(String idToken) {
+    private UserInfo parseIdToken(String idToken) {
         try {
             return jwtProvider.parserIdToken(idToken);
         } catch (Exception e) {
@@ -60,15 +53,15 @@ public class OAuthService {
         }
     }
 
-    private OAuthUserInfo getUserInfo(String provider, UserInfo claims) {
+    private OAuthUserInfo getUserInfo(UserInfo claims) {
         try {
-            return OAuthUserInfo.OAuthUserInfoFactory.getUserInfo(provider, claims);
+            return OAuthUserInfo.OAuthUserInfoFactory.getUserInfo("kakao", claims);
         } catch (Exception e) {
             throw new OAuthLoginFailedException("UserInfo 생성 실패: " + e.getMessage());
         }
     }
 
-    private Member getOrCreateMember(OAuthUserInfo userInfo, String provider) {
+    private Member getOrCreateMember(OAuthUserInfo userInfo) {
         Member member = memberRepository.findByEmail(userInfo.getEmail())
                 .orElseGet(() -> memberRepository.save(
                         Member.builder()
@@ -80,7 +73,7 @@ public class OAuthService {
                 ));
 
         memberRepository.flush();
-        System.out.println("저장된 member: " + member.getId());
+        log.info("저장된 member: {}", member.getId());
         return member;
     }
 }

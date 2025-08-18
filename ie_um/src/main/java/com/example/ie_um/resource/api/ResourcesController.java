@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,12 +19,12 @@ public class ResourcesController {
     private final ResourceService resourceService;
 
     @PostMapping()
-    public RspTemplate<ResourceListResDto> forwardHashtags(@RequestBody HashTagReqDto reqDto) {
-
-        return new RspTemplate<>(
-                HttpStatus.OK,
-                "해시태그를 성공적으로 전달하였습니다.",
-                resourceService.forwardHashtags(reqDto)
-        );
+    public Mono<RspTemplate<ResourceListResDto>> forwardHashtags(@RequestBody HashTagReqDto reqDto) {
+        return resourceService.forwardHashtags(reqDto)
+                .map(data -> new RspTemplate<>(
+                        HttpStatus.OK,
+                        "해시태그를 전달하여 성공적으로 자원을 추천받았습니다.",
+                        data
+                ));
     }
 }
