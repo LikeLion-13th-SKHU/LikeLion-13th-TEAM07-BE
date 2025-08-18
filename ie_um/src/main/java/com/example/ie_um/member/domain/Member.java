@@ -38,6 +38,7 @@ public class Member {
         this.name = name;
         this.nickName = nickName;
         this.gender = gender;
+        this.age = 0;
     }
 
     public void update(String nickName, Gender gender, int age) {
