@@ -6,11 +6,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import com.example.ie_um.auth.application.OAuthService;
 import com.example.ie_um.global.jwt.dto.TokenDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "OAuth", description = "OAuth 로그인 관련 API")
@@ -42,6 +44,7 @@ public class OAuthController {
             summary = "카카오 OAuth 콜백 처리 및 JWT 반환",
             description = "카카오에서 받은 인가 코드로 토큰을 발급하고 사용자에게 JWT 반환"
     )
+
     @GetMapping("/callback/kakao")
     public ResponseEntity<TokenDto> handleCallback(@RequestParam String code) {
         TokenDto tokenDto = oAuthService.handleOAuthLogin(code);

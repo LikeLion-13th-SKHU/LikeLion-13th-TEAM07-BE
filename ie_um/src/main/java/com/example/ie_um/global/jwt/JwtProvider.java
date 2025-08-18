@@ -41,6 +41,7 @@ public class JwtProvider {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + this.expiry);
 
+
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
