@@ -33,7 +33,7 @@ public class OAuthService {
         UserInfo claims = parseIdToken(idToken);
         OAuthUserInfo userInfo = getUserInfo(claims);
         Member member = getOrCreateMember(userInfo);
-        String token = jwtProvider.createToken(member.getEmail(), member.getId());
+        String token = jwtProvider.createToken(member.getEmail(), member.getId()); // 성공
         return new TokenDto(token);
     }
 
@@ -67,13 +67,12 @@ public class OAuthService {
                         Member.builder()
                                 .email(userInfo.getEmail())
                                 .name(userInfo.getName())
-                                .nickName("")
+                                .nickName("아무거나")
                                 .gender(Gender.UNKNOWN)
                                 .build()
                 ));
 
         memberRepository.flush();
-        log.info("저장된 member: {}", member.getId());
         return member;
     }
 }

@@ -3,14 +3,12 @@ package com.example.ie_um.auth.client;
 import com.example.ie_um.auth.api.dto.KakaoTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -19,16 +17,16 @@ public class KakaoOAuthClient {
 
     @Value("${oauth.kakao.client-id}")
     private String clientId;
-    @Value("${oauth.kakao.client-secret}") // yml 파일에 client-secret 추가
+    @Value("${oauth.kakao.client-secret}")
     private String clientSecret;
     @Value("${oauth.kakao.redirect-uri}")
     private String redirectUri;
 
     public String getAuthUrl() {
         return "https://kauth.kakao.com/oauth/authorize?" +
+                "&response_type=code&" +
                 "client_id=" + clientId +
-                "&redirect_uri=" + redirectUri +
-                "&response_type=code";
+                "&redirect_uri=" + redirectUri;
     }
 
     public String getIdToken(String code) {
@@ -44,7 +42,7 @@ public class KakaoOAuthClient {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .bodyValue(params)
                 .retrieve()
-                .bodyToMono(KakaoTokenResponse.class) // ◀ DTO 클래스로 바로 매핑
+                .bodyToMono(KakaoTokenResponse.class)
                 .block();
 
         if (response == null || response.idToken() == null) {
