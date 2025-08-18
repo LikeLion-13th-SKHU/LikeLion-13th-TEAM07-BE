@@ -10,7 +10,8 @@ public record MemberInfoResDto(
         String email,
         String name,
         String nickName,
-        Gender gender
+        Gender gender,
+        int age
 ) {
     public static MemberInfoResDto from(Member member) {
         return MemberInfoResDto.builder()
@@ -19,6 +20,7 @@ public record MemberInfoResDto(
                 .name(member.getName())
                 .nickName(member.getNickName())
                 .gender(member.getGender())
+                .age(member.getAge())
                 .build();
     }
 }

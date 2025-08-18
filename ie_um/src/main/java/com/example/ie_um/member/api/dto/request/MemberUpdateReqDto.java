@@ -5,8 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record MemberUpdateReqDto(
-        String name,
         String nickName,
-        Gender gender
+        Gender gender,
+        int age
 ) {
 }

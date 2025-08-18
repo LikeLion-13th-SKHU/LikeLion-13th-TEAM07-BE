@@ -19,14 +19,14 @@ public class Member {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-//    @Column(name = "password", nullable = false)
-//    private String password;
-
     @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "nickName", nullable = false, unique = true)
     private String nickName;
+
+    @Column(name = "age")
+    private int age;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
@@ -35,15 +35,14 @@ public class Member {
     @Builder
     private Member(String email, String name, String nickName,  Gender gender) {
         this.email = email;
-//        this.password = password;
         this.name = name;
         this.nickName = nickName;
         this.gender = gender;
     }
 
-    public void update(String name, String nickName, Gender gender) {
-        this.name = name;
+    public void update(String nickName, Gender gender, int age) {
         this.nickName = nickName;
         this.gender = gender;
+        this.age = age;
     }
 }
