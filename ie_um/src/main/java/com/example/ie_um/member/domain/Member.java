@@ -26,7 +26,7 @@ public class Member {
     private String nickName;
 
     @Column(name = "age")
-    private int age;
+    private Integer age;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
@@ -41,7 +41,7 @@ public class Member {
         this.age = 0;
     }
 
-    public void update(String nickName, Gender gender, int age) {
+    public void update(String nickName, Gender gender, Integer age) {
         this.nickName = nickName;
         this.gender = gender;
         this.age = age;
