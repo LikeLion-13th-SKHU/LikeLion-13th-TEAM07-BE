@@ -14,18 +14,21 @@ import com.example.ie_um.accompany.domain.repository.AccompanyRepository;
 import com.example.ie_um.accompany.exception.AccompanyInvalidGroupException;
 import com.example.ie_um.accompany.exception.AccompanyNotFoundException;
 import com.example.ie_um.accompany.exception.AccompanyPersonnelInvalidGroupException;
+import com.example.ie_um.global.annotation.AuthenticatedId;
 import com.example.ie_um.member.domain.Member;
 import com.example.ie_um.member.exception.MemberNotFoundException;
 import com.example.ie_um.member.repository.MemberRepository;
 import com.example.ie_um.resource.api.dto.response.ResourceResDto;
 import com.example.ie_um.resource.domain.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,9 +38,8 @@ public class AccompanyService {
     private final AccompanyMemberRepository accompanyMemberRepository;
 
     @Transactional
-    public void create(Long memberId, AccompanyCreateReqDto accompanyCreateReqDto) {
-        // TODO: 로그인 한 사용자 정보 가져오기
-        Member member = memberRepository.findById(memberId)
+    public void create(Long id, AccompanyCreateReqDto accompanyCreateReqDto) {
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
 
         Resource resource = Resource.builder()
