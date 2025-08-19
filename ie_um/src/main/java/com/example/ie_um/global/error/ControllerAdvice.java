@@ -5,6 +5,7 @@ import com.example.ie_um.global.error.exception.AccessDeniedGroupException;
 import com.example.ie_um.global.error.exception.AuthGroupException;
 import com.example.ie_um.global.error.exception.InvalidGroupException;
 import com.example.ie_um.global.error.exception.NotFoundGroupException;
+import com.example.ie_um.member.exception.DuplicateNickNameException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,5 +36,11 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponse> handlerNotFoundData(RuntimeException e) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({DuplicateNickNameException.class})
+    public ResponseEntity<ErrorResponse> handlerDuplicateNickName(DuplicateNickNameException e) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 }
