@@ -3,7 +3,8 @@ package com.example.ie_um.accompany.domain;
 import lombok.Getter;
 
 @Getter
-public enum AccompanyStatus {
+public enum AccompanyRole {
+    OWNER("생성자"),
     PENDING("대기중"),
     ACCEPTED("수락됨"),
     REJECTED("거절됨"),
@@ -11,8 +12,7 @@ public enum AccompanyStatus {
 
     private final String description;
 
-    AccompanyStatus(String description) {
+    AccompanyRole(String description) {
         this.description = description;
     }
-
 }

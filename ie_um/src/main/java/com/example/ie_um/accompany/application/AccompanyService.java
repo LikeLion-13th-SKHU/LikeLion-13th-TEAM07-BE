@@ -8,27 +8,22 @@ import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyListResDto;
 import com.example.ie_um.accompany.domain.Accompany;
 import com.example.ie_um.accompany.domain.AccompanyMember;
-import com.example.ie_um.accompany.domain.AccompanyStatus;
+import com.example.ie_um.accompany.domain.AccompanyRole;
 import com.example.ie_um.accompany.domain.repository.AccompanyMemberRepository;
 import com.example.ie_um.accompany.domain.repository.AccompanyRepository;
 import com.example.ie_um.accompany.exception.AccompanyInvalidGroupException;
 import com.example.ie_um.accompany.exception.AccompanyNotFoundException;
 import com.example.ie_um.accompany.exception.AccompanyPersonnelInvalidGroupException;
-import com.example.ie_um.global.annotation.AuthenticatedId;
 import com.example.ie_um.member.domain.Member;
 import com.example.ie_um.member.exception.MemberNotFoundException;
 import com.example.ie_um.member.repository.MemberRepository;
-import com.example.ie_um.resource.api.dto.response.ResourceResDto;
-import com.example.ie_um.resource.domain.Resource;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -38,32 +33,22 @@ public class AccompanyService {
     private final AccompanyMemberRepository accompanyMemberRepository;
 
     @Transactional
-    public void create(Long id, AccompanyCreateReqDto accompanyCreateReqDto) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
-
-        Resource resource = Resource.builder()
-                .name(accompanyCreateReqDto.name())
-                .description(accompanyCreateReqDto.description())
-                .address(accompanyCreateReqDto.address())
-                .latitude(accompanyCreateReqDto.latitude())
-                .longitude(accompanyCreateReqDto.longitude())
-                .build();
+    public void create(Long memberId, AccompanyCreateReqDto dto) {
+        Member member = findMemberById(memberId);
 
         Accompany accompany = Accompany.builder()
-                .title(accompanyCreateReqDto.title())
-                .content(accompanyCreateReqDto.content())
-                .maxPersonnel(accompanyCreateReqDto.maxPersonnel())
+                .title(dto.title())
+                .content(dto.content())
+                .maxPersonnel(dto.maxPersonnel())
                 .currentPersonnel(1)
-                .time(accompanyCreateReqDto.time())
-                .place(resource)
+                .time(dto.time())
+                .address(dto.address())
                 .build();
 
         AccompanyMember accompanyMember = AccompanyMember.builder()
                 .member(member)
                 .accompany(accompany)
-                .isOwner(true)
-                .accompanyStatus(AccompanyStatus.ACCEPTED)
+                .role(AccompanyRole.OWNER)
                 .build();
 
         accompanyRepository.save(accompany);
@@ -71,28 +56,8 @@ public class AccompanyService {
     }
 
     public AccompanyInfoResDto getDetail(Long accompanyId) {
-        Accompany accompany = accompanyRepository.findById(accompanyId)
-                .orElseThrow(() -> new AccompanyNotFoundException("동행 그룹을 찾을 수 없습니다."));
-
-        Resource resource = accompany.getPlace();
-
-        ResourceResDto resourceResDto = ResourceResDto.builder()
-                .name(resource.getName())
-                .description(resource.getDescription())
-                .address(resource.getAddress())
-                .latitude(resource.getLatitude())
-                .longitude(resource.getLongitude())
-                .build();
-
-        return AccompanyInfoResDto.builder()
-                .id(accompany.getId())
-                .title(accompany.getTitle())
-                .content(accompany.getContent())
-                .maxPersonnel(accompany.getMaxPersonnel())
-                .currentPersonnel(accompany.getCurrentPersonnel())
-                .time(accompany.getTime())
-                .place(resourceResDto)
-                .build();
+        Accompany accompany = findAccompanyById(accompanyId);
+        return AccompanyInfoResDto.from(accompany);
     }
 
     public AccompanyListResDto getAll() {
@@ -101,7 +66,7 @@ public class AccompanyService {
     }
 
     public AccompanyListResDto getByMemberId(Long memberId) {
-        List<AccompanyMember> accompanyMembers = accompanyMemberRepository.findByMemberIdAndAccompanyStatus(memberId, AccompanyStatus.ACCEPTED);
+        List<AccompanyMember> accompanyMembers = accompanyMemberRepository.findByMemberIdAndRole(memberId, AccompanyRole.ACCEPTED);
 
         List<Accompany> accompanyList = accompanyMembers.stream()
                 .map(AccompanyMember::getAccompany)
@@ -111,24 +76,11 @@ public class AccompanyService {
     }
 
     public AccompanyApplyListResDto getApplied(Long memberId) {
-        List<AccompanyStatus> statuses = Arrays.asList(AccompanyStatus.PENDING, AccompanyStatus.REJECTED);
-
-        List<AccompanyMember> appliedMembers = accompanyMemberRepository.findByMemberIdAndAccompanyStatusIn(memberId, statuses);
+        List<AccompanyRole> roles = Arrays.asList(AccompanyRole.PENDING, AccompanyRole.REJECTED);
+        List<AccompanyMember> appliedMembers = accompanyMemberRepository.findByMemberIdAndRoleIn(memberId, roles);
 
         List<AccompanyApplyResDto> appliedGroupDtos = appliedMembers.stream()
-                .map(accompanyMember -> {
-                    Accompany accompany = accompanyMember.getAccompany();
-                    return AccompanyApplyResDto.builder()
-                            .id(accompany.getId())
-                            .title(accompany.getTitle())
-                            .content(accompany.getContent())
-                            .maxPersonnel(accompany.getMaxPersonnel())
-                            .currentPersonnel(accompany.getCurrentPersonnel())
-                            .time(accompany.getTime())
-                            .place(getResourceResDto(accompany.getPlace()))
-                            .status(accompanyMember.getAccompanyStatus().getDescription())
-                            .build();
-                })
+                .map(AccompanyApplyResDto::from)
                 .toList();
 
         return AccompanyApplyListResDto.from(appliedGroupDtos);
@@ -136,7 +88,8 @@ public class AccompanyService {
 
     @Transactional
     public void update(Long memberId, Long accompanyId, AccompanyUpdateReqDto accompanyUpdateReqDto) {
-        Accompany accompany = validateOwnerAndGetAccompany(memberId, accompanyId);
+        validateOwner(memberId, accompanyId);
+        Accompany accompany = findAccompanyById(accompanyId);
 
         accompany.update(accompanyUpdateReqDto.title(),
                 accompanyUpdateReqDto.content(),
@@ -147,56 +100,54 @@ public class AccompanyService {
 
     @Transactional
     public void leave(Long memberId, Long accompanyId) {
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("해당 동행 그룹의 참가자가 아닙니다."));
+        AccompanyMember accompanyMember = accompanyMemberRepository
+                .findByMemberIdAndAccompanyId(memberId, accompanyId)
+                .orElseThrow(() -> new AccompanyInvalidGroupException("참여자가 아닙니다."));
 
-        if (accompanyMember.getAccompanyStatus() != AccompanyStatus.ACCEPTED) {
-            throw new AccompanyInvalidGroupException("이미 그룹에 속해있지 않습니다.");
+        Accompany accompany = accompanyMember.getAccompany();
+
+        if (accompanyMember.getRole() != AccompanyRole.ACCEPTED && accompanyMember.getRole() != AccompanyRole.OWNER) {
+            throw new AccompanyInvalidGroupException("참여가 수락된 상태에서만 탈퇴가 가능합니다.");
         }
 
-        if (accompanyMember.isOwner()) {
+        if (accompanyMember.getRole() == AccompanyRole.OWNER) {
             accompanyMemberRepository.deleteByAccompanyId(accompanyId);
             accompanyRepository.deleteById(accompanyId);
-
         } else {
-            Accompany accompany = accompanyMember.getAccompany();
-            accompanyMemberRepository.delete(accompanyMember);
+            accompanyMember.updateAccompanyStatus(AccompanyRole.LEAVE);
             accompany.decreaseCurrentPersonnel();
         }
     }
 
     @Transactional
     public void apply(Long memberId, Long accompanyId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
-        Accompany accompany = accompanyRepository.findById(accompanyId)
-                .orElseThrow(() -> new AccompanyNotFoundException("동행 그룹을 찾을 수 없습니다."));
+        Member member = findMemberById(memberId);
+        Accompany accompany = findAccompanyById(accompanyId);
 
         if (accompany.getMaxPersonnel() <= accompany.getCurrentPersonnel()) {
-            throw new AccompanyPersonnelInvalidGroupException("동행 그룹 정원을 초과하였습니다.");
+            throw new AccompanyPersonnelInvalidGroupException("정원이 초과되었습니다.");
         }
 
-        accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
-                .ifPresent(accompanyMember -> {
-                    throw new AccompanyInvalidGroupException("이미 동행 그룹에 속해있거나 신청 대기 중입니다.");
-                });
+        if (accompanyMemberRepository.existsByMemberIdAndAccompany(memberId, accompany)) {
+            throw new AccompanyInvalidGroupException("이미 신청/참여 중인 사용자입니다.");
+        }
 
-        AccompanyMember accompanyMember = AccompanyMember.builder()
+        AccompanyMember applyMember = AccompanyMember.builder()
                 .member(member)
                 .accompany(accompany)
-                .isOwner(false)
-                .accompanyStatus(AccompanyStatus.PENDING)
+                .role(AccompanyRole.PENDING)
                 .build();
 
-        accompanyMemberRepository.save(accompanyMember);
+        accompanyMemberRepository.save(applyMember);
     }
 
     @Transactional
     public void unapply(Long memberId, Long accompanyId) {
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
+        Accompany accompany = findAccompanyById(accompanyId);
+        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompany(memberId, accompany)
                 .orElseThrow(() -> new AccompanyInvalidGroupException("신청 내역이 존재하지 않습니다."));
 
-        if (accompanyMember.getAccompanyStatus() != AccompanyStatus.PENDING) {
+        if (accompanyMember.getRole() != AccompanyRole.PENDING) {
             throw new AccompanyInvalidGroupException("신청 대기 중인 상태에서만 취소가 가능합니다.");
         }
 
@@ -204,78 +155,63 @@ public class AccompanyService {
     }
 
     @Transactional
-    public void accept(Long ownerId, Long memberIdToAccept, Long accompanyId) {
-        validateOwner(ownerId, accompanyId);
+    public void accept(Long ownerId, Long accompanyId, Long applicantId) {
+        AccompanyMember applicant = findAndValidatePendingApplicant(ownerId, accompanyId, applicantId);
 
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberIdToAccept, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("신청 내역이 존재하지 않습니다."));
-
-        if (accompanyMember.getAccompanyStatus() != AccompanyStatus.PENDING) {
-            throw new AccompanyInvalidGroupException("이미 처리된 신청입니다.");
-        }
-
-        Accompany accompany = accompanyMember.getAccompany();
+        Accompany accompany = applicant.getAccompany();
         if (accompany.getMaxPersonnel() <= accompany.getCurrentPersonnel()) {
-            throw new AccompanyPersonnelInvalidGroupException("동행 그룹 정원을 초과하여 수락할 수 없습니다.");
+            throw new AccompanyPersonnelInvalidGroupException("정원 초과");
         }
 
-        accompanyMember.updateAccompanyStatus(AccompanyStatus.ACCEPTED);
+        applicant.updateAccompanyStatus(AccompanyRole.ACCEPTED);
         accompany.increaseCurrentPersonnel();
     }
 
     @Transactional
-    public void reject(Long ownerId, Long memberIdToReject, Long accompanyId) {
-        validateOwner(ownerId, accompanyId);
+    public void reject(Long ownerId, Long accompanyId, Long applicantId) {
+        AccompanyMember applicant = findAndValidatePendingApplicant(ownerId, accompanyId, applicantId);
 
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberIdToReject, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("신청 내역이 존재하지 않습니다."));
-
-        if (accompanyMember.getAccompanyStatus() != AccompanyStatus.PENDING) {
-            throw new AccompanyInvalidGroupException("이미 처리된 신청입니다.");
-        }
-
-        accompanyMemberRepository.delete(accompanyMember);
+        applicant.updateAccompanyStatus(AccompanyRole.REJECTED);
     }
 
     private void validateOwner(Long memberId, Long accompanyId) {
-        validateOwnerAndGetAccompany(memberId, accompanyId);
-    }
+        AccompanyMember member = accompanyMemberRepository
+                .findByMemberIdAndAccompanyId(memberId, accompanyId)
+                .orElseThrow(() -> new AccompanyInvalidGroupException("참여자가 아닙니다."));
 
-
-    private Accompany validateOwnerAndGetAccompany(Long memberId, Long accompanyId) {
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("해당 동행 그룹에 참여하지 않았습니다."));
-
-        if (!accompanyMember.isOwner()) {
-            throw new AccompanyInvalidGroupException("동행그룹 생성자만 수정/삭제할 수 있습니다.");
+        if (member.getRole() != AccompanyRole.OWNER) {
+            throw new AccompanyInvalidGroupException("생성자만 가능합니다.");
         }
-
-        return accompanyMember.getAccompany();
     }
 
-    private AccompanyListResDto getAccompanyListResDto(List<Accompany> appliedGroups) {
-        List<AccompanyInfoResDto> appliedGroupDtos = appliedGroups.stream()
-                .map(accompany -> AccompanyInfoResDto.builder()
-                        .id(accompany.getId())
-                        .title(accompany.getTitle())
-                        .content(accompany.getContent())
-                        .maxPersonnel(accompany.getMaxPersonnel())
-                        .currentPersonnel(accompany.getCurrentPersonnel())
-                        .time(accompany.getTime())
-                        .place(getResourceResDto(accompany.getPlace()))
-                        .build())
+    private AccompanyMember findAndValidatePendingApplicant(Long ownerId, Long accompanyId, Long applicantId) {
+        validateOwner(ownerId, accompanyId);
+
+        AccompanyMember applicant = accompanyMemberRepository
+                .findByMemberIdAndAccompanyId(applicantId, accompanyId)
+                .orElseThrow(() -> new AccompanyInvalidGroupException("신청 내역이 없습니다."));
+
+        if (applicant.getRole() != AccompanyRole.PENDING) {
+            throw new AccompanyInvalidGroupException("이미 처리된 신청입니다.");
+        }
+        return applicant;
+    }
+
+    private AccompanyListResDto getAccompanyListResDto(List<Accompany> accompanyList) {
+        List<AccompanyInfoResDto> accompanyInfoDtos = accompanyList.stream()
+                .map(AccompanyInfoResDto::from)
                 .toList();
 
-        return AccompanyListResDto.from(appliedGroupDtos);
+        return AccompanyListResDto.from(accompanyInfoDtos);
     }
 
-    private ResourceResDto getResourceResDto(Resource resource) {
-        return ResourceResDto.builder()
-                .name(resource.getName())
-                .description(resource.getDescription())
-                .address(resource.getAddress())
-                .latitude(resource.getLatitude())
-                .longitude(resource.getLongitude())
-                .build();
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
+    }
+
+    private Accompany findAccompanyById(Long accompanyId) {
+        return accompanyRepository.findById(accompanyId)
+                .orElseThrow(() -> new AccompanyNotFoundException("동행 그룹을 찾을 수 없습니다."));
     }
 }
