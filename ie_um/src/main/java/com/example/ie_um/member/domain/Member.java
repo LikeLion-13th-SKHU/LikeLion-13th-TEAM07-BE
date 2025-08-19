@@ -25,20 +25,20 @@ public class Member {
     @Column(name = "nickName", nullable = false, unique = true)
     private String nickName;
 
-    @Column(name = "age")
+    @Column(name = "age", nullable = true)
     private Integer age;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender", nullable = true)
     private Gender gender;
 
     @Builder
-    private Member(String email, String name, String nickName,  Gender gender) {
+    private Member(String email, String name, String nickName) {
         this.email = email;
         this.name = name;
         this.nickName = nickName;
-        this.gender = gender;
-        this.age = 0;
+        this.gender = null;
+        this.age = null;
     }
 
     public void update(String nickName, Gender gender, Integer age) {
