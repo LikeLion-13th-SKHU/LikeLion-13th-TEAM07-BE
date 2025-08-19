@@ -47,30 +47,4 @@ public class ResourceService {
                     return new AiServiceException("AI 추천 서비스 호출 중 오류가 발생했습니다.");
                 });
     }
-
-
-//    public ResourceListResDto forwardHashtags(HashTagReqDto request) {
-//        try {
-//            AiApiResponse aiResponse = webClient.post()
-//                    .uri("/api/recommend")
-//                    .bodyValue(request)
-//                    .retrieve()
-//                    .bodyToMono(AiApiResponse.class)
-//                    .block();
-//
-//            if (aiResponse == null || aiResponse.data() == null) {
-//                throw new AiServiceException("AI 서버로부터 유효한 데이터를 받지 못했습니다.");
-//            }
-//
-//            return aiResponse.data();
-//
-//        } catch (WebClientResponseException e) {
-//            log.error("AI 서버 응답 에러: status={}, body={}", e.getRawStatusCode(), e.getResponseBodyAsString());
-//            throw new AiServiceException("AI 추천 서비스에 문제가 발생했습니다.");
-//
-//        } catch (Exception e) {
-//            log.error("AI 서버 호출 중 알 수 없는 에러 발생", e);
-//            throw new AiServiceException("AI 추천 서비스 호출 중 오류가 발생했습니다.");
-//        }
-//    }
 }
