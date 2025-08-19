@@ -67,8 +67,7 @@ public class OAuthService {
                         Member.builder()
                                 .email(userInfo.getEmail())
                                 .name(userInfo.getName())
-                                .nickName("")
-                                .gender(Gender.UNKNOWN)
+                                .nickName(userInfo.getName())
                                 .build()
                 ));
 
