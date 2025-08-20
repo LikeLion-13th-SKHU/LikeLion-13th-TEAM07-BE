@@ -18,6 +18,16 @@ spring:
         format_sql: false
         use_sql_comments: true
 
+  cloud:
+    gcp:
+      project-id: ${spring.cloud.gcp.project-id}
+      storage:
+        bucket:
+          name: ${spring.cloud.gcp.storage.bucket.name}
+        credentials:
+          location: ${spring.cloud.gcp.storage.credentials.location}
+
+
 swagger:
   server:
     local-url: ${swagger.server.local-url}

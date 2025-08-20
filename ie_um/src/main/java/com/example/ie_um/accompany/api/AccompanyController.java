@@ -9,6 +9,7 @@ import com.example.ie_um.accompany.application.AccompanyService;
 import com.example.ie_um.global.annotation.AuthenticatedId;
 import com.example.ie_um.global.template.RspTemplate;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,7 +32,7 @@ public class AccompanyController {
             description = "동행그룹을 생성합니다."
     )
     @PostMapping
-    public RspTemplate<String> create(@AuthenticatedId Long memberId,
+    public RspTemplate<String> create(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                       @RequestBody AccompanyCreateReqDto accompanyCreateReqDto) {
          accompanyService.create(memberId, accompanyCreateReqDto);
          return new RspTemplate<>(
@@ -51,7 +52,7 @@ public class AccompanyController {
             )
     )
     @GetMapping("/{accompanyId}")
-    public RspTemplate<AccompanyInfoResDto> getDetail(@AuthenticatedId Long memberId,
+    public RspTemplate<AccompanyInfoResDto> getDetail(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                                       @PathVariable(value = "accompanyId") Long accompanyId) {
         return new RspTemplate<>(
                 HttpStatus.OK,
@@ -71,7 +72,7 @@ public class AccompanyController {
             )
     )
     @GetMapping
-    public RspTemplate<AccompanyListResDto> getAll(@AuthenticatedId Long memberId) {
+    public RspTemplate<AccompanyListResDto> getAll(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "동행그룹 전체가 성공적으로 조회되었습니다.",
@@ -90,7 +91,7 @@ public class AccompanyController {
             )
     )
     @GetMapping("/member")
-    public RspTemplate<AccompanyListResDto> getByMemberId(@AuthenticatedId Long memberId) {
+    public RspTemplate<AccompanyListResDto> getByMemberId(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자가 포함된 동행그룹이 성공적으로 조회되었습니다.",
@@ -109,7 +110,7 @@ public class AccompanyController {
             )
     )
     @GetMapping("/apply")
-    public RspTemplate<AccompanyApplyListResDto> getApplied(@AuthenticatedId Long memberId) {
+    public RspTemplate<AccompanyApplyListResDto> getApplied(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자가 신청한 동행그룹이 성공적으로 조회되었습니다.",
@@ -122,7 +123,7 @@ public class AccompanyController {
             description = "동행그룹을 수정합니다."
     )
     @PutMapping("/{accompanyId}")
-    public RspTemplate<String> update(@AuthenticatedId Long memberId,
+    public RspTemplate<String> update(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                       @PathVariable(value = "accompanyId") Long accompanyId,
                                       @RequestBody AccompanyUpdateReqDto accompanyUpdateReqDto) {
         accompanyService.update(memberId, accompanyId, accompanyUpdateReqDto);
@@ -137,7 +138,7 @@ public class AccompanyController {
             description = "생성자는 동행그룹을 삭제합니다. 참가자는 동행그룹을 탈퇴합니다."
     )
     @DeleteMapping("/{accompanyId}")
-    public RspTemplate<String> leave(@AuthenticatedId Long memberId,
+    public RspTemplate<String> leave(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                      @PathVariable(value = "accompanyId") Long accompanyId) {
         accompanyService.leave(memberId, accompanyId);
         return new RspTemplate<>(
@@ -151,7 +152,7 @@ public class AccompanyController {
             description = "동행그룹에 신청합니다. 참가자와 신청자는 또 신청할 수 없습니다."
     )
     @PostMapping("/apply/{accompanyId}")
-    public RspTemplate<String> apply(@AuthenticatedId Long memberId,
+    public RspTemplate<String> apply(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                      @PathVariable(value = "accompanyId") Long accompanyId) {
         accompanyService.apply(memberId, accompanyId);
         return new RspTemplate<>(
@@ -165,7 +166,7 @@ public class AccompanyController {
             description = "동행그룹 신청을 취소합니다."
     )
     @DeleteMapping("/unapply/{accompanyId}")
-    public RspTemplate<String> unapply(@AuthenticatedId Long memberId,
+    public RspTemplate<String> unapply(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                        @PathVariable(value = "accompanyId") Long accompanyId) {
         accompanyService.unapply(memberId, accompanyId);
         return new RspTemplate<>(
@@ -179,7 +180,7 @@ public class AccompanyController {
             description = "동행그룹 신청을 수락합니다. 생성자(OWNER)만 가능합니다."
     )
     @PostMapping("/{accompanyId}/accept/{applicantId}")
-    public RspTemplate<String> accept(@AuthenticatedId Long memberId,
+    public RspTemplate<String> accept(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                       @PathVariable(value = "accompanyId") Long accompanyId,
                                       @PathVariable(value = "applicantId") Long applicantId) {
         log.info("controller accompanyId={}, applicantId={}", accompanyId, applicantId);
@@ -195,7 +196,7 @@ public class AccompanyController {
             description = "동행그룹 신청을 거절합니다. 생성자(OWNER)만 가능합니다."
     )
     @PostMapping("/{accompanyId}/reject/{applicantId}")
-    public RspTemplate<String> reject(@AuthenticatedId Long memberId,
+    public RspTemplate<String> reject(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                       @PathVariable(value = "accompanyId") Long accompanyId,
                                       @PathVariable(value = "applicantId") Long applicantId) {
         accompanyService.reject(memberId, accompanyId, applicantId);
