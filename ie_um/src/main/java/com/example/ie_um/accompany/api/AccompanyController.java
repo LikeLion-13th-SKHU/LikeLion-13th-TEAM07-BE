@@ -176,32 +176,32 @@ public class AccompanyController {
 
     @Operation(
             summary = "동행그룹 신청 수락",
-            description = "동행그룹 신청을 수락합니다. 생성자만 거절할 수 있습니다."
+            description = "동행그룹 신청을 수락합니다. 생성자(OWNER)만 가능합니다."
     )
-    @PostMapping("/accept/{ownerId}/{accompanyId}")
-    public RspTemplate<String> accept(@PathVariable(value = "ownerId") Long ownerId,
-                                      @AuthenticatedId Long memberIdToAccept,
-                                      @PathVariable(value = "accompanyId") Long accompanyId) {
-        accompanyService.accept(ownerId, memberIdToAccept, accompanyId);
+    @PostMapping("/{accompanyId}/accept/{applicantId}")
+    public RspTemplate<String> accept(@AuthenticatedId Long memberId,
+                                      @PathVariable(value = "accompanyId") Long accompanyId,
+                                      @PathVariable(value = "applicantId") Long applicantId) {
+        log.info("controller accompanyId={}, applicantId={}", accompanyId, applicantId);
+        accompanyService.accept(memberId, accompanyId, applicantId);
         return new RspTemplate<>(
                 HttpStatus.OK,
-                "동행그룹 선청을 성공적으로 수락했습니다."
+                "동행그룹 신청을 성공적으로 수락했습니다."
         );
     }
 
     @Operation(
             summary = "동행그룹 신청 거절",
-            description = "동행그룹 신청을 거절합니다. 생성자만 거절할 수 있습니다."
+            description = "동행그룹 신청을 거절합니다. 생성자(OWNER)만 가능합니다."
     )
-    @PostMapping("/reject/{ownerId}/{accompanyId}")
-    public RspTemplate<String> reject(@PathVariable(value = "ownerId") Long ownerId,
-                                      @AuthenticatedId Long memberIdToReject,
-                                      @PathVariable(value = "accompanyId") Long accompanyId) {
-        accompanyService.reject(ownerId, memberIdToReject, accompanyId);
+    @PostMapping("/{accompanyId}/reject/{applicantId}")
+    public RspTemplate<String> reject(@AuthenticatedId Long memberId,
+                                      @PathVariable(value = "accompanyId") Long accompanyId,
+                                      @PathVariable(value = "applicantId") Long applicantId) {
+        accompanyService.reject(memberId, accompanyId, applicantId);
         return new RspTemplate<>(
                 HttpStatus.OK,
-                "동행그룹 선청을 성공적으로 거절했습니다."
+                "동행그룹 신청을 성공적으로 거절했습니다."
         );
     }
-
 }

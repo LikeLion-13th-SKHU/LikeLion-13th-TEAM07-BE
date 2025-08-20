@@ -25,22 +25,18 @@ public class AccompanyMember extends BaseTimeEntity {
     @JoinColumn(name = "accompany_id")
     private Accompany accompany;
 
-    @Column(name = "is_owner")
-    private boolean isOwner;
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "accompany_status")
-    private AccompanyStatus accompanyStatus;
+    @Column(name = "role")
+    private AccompanyRole role;
 
     @Builder
-    private AccompanyMember(Member member, Accompany accompany, boolean isOwner, AccompanyStatus accompanyStatus) {
+    private AccompanyMember(Member member, Accompany accompany, AccompanyRole role) {
         this.member = member;
         this.accompany = accompany;
-        this.isOwner = isOwner;
-        this.accompanyStatus = accompanyStatus;
+        this.role = role;
     }
 
-    public void updateAccompanyStatus(AccompanyStatus accompanyStatus) {
-        this.accompanyStatus = accompanyStatus;
+    public void updateAccompanyStatus(AccompanyRole accompanyRole) {
+        this.role = accompanyRole;
     }
 }
