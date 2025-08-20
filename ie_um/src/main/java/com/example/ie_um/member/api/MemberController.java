@@ -6,6 +6,7 @@ import com.example.ie_um.member.api.dto.request.MemberUpdateReqDto;
 import com.example.ie_um.member.api.dto.response.MemberInfoResDto;
 import com.example.ie_um.member.application.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class MemberController {
             description = "로그인된 사용자의 프로필 정보를 조회합니다."
     )
     @GetMapping
-    public RspTemplate<MemberInfoResDto> getInfo(@AuthenticatedId Long currentMemberId) {
+    public RspTemplate<MemberInfoResDto> getInfo(@Parameter(hidden = true) @AuthenticatedId Long currentMemberId) {
         MemberInfoResDto memberInfo = memberService.getInfo(currentMemberId);
         return new RspTemplate<>(
                 HttpStatus.OK,
@@ -39,7 +40,7 @@ public class MemberController {
     )
     @PutMapping
     public RspTemplate<String> update(
-            @AuthenticatedId Long currentMemberId,
+            @Parameter(hidden = true) @AuthenticatedId Long currentMemberId,
             @RequestBody MemberUpdateReqDto updateReqDto) {
 
         memberService.update(currentMemberId, updateReqDto);

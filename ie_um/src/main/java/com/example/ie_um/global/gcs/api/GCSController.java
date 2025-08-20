@@ -4,6 +4,7 @@ import com.example.ie_um.global.annotation.AuthenticatedId;
 import com.example.ie_um.global.gcs.application.GCSService;
 import com.example.ie_um.global.template.RspTemplate;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,8 @@ public class GCSController {
             description = "이미지를 업로드합니다."
     )
     @PostMapping()
-    public RspTemplate<String> upload(@AuthenticatedId Long id, @RequestParam("file") MultipartFile file) {
+    public RspTemplate<String> upload(@Parameter(hidden = true) @AuthenticatedId Long id,
+                                      @RequestParam("file") MultipartFile file) {
         try {
             String fileName = gcsService.uploadFile(id, file);
             return new RspTemplate<>(HttpStatus.OK,
@@ -42,7 +44,8 @@ public class GCSController {
             description = "이미지를 삭제합니다."
     )
     @DeleteMapping()
-    public RspTemplate<String> delete(@AuthenticatedId Long id, @RequestParam("fileName") String fileName) {
+    public RspTemplate<String> delete(@Parameter(hidden = true) @AuthenticatedId Long id,
+                                      @RequestParam("fileName") String fileName) {
         try {
             gcsService.deleteFile(id, fileName);
             return new RspTemplate<>(HttpStatus.OK,
