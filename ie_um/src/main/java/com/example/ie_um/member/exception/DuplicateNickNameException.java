@@ -1,6 +1,8 @@
 package com.example.ie_um.member.exception;
 
-public class DuplicateNickNameException extends RuntimeException {
+import com.example.ie_um.global.error.exception.BusinessException;
+
+public class DuplicateNickNameException extends BusinessException {
 
     public DuplicateNickNameException(String message) {
         super(message);
