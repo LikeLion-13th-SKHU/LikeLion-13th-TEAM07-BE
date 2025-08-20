@@ -37,10 +37,4 @@ public class ControllerAdvice {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
-
-    @ExceptionHandler({DuplicateNickNameException.class})
-    public ResponseEntity<ErrorResponse> handlerDuplicateNickName(DuplicateNickNameException e) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
 }
