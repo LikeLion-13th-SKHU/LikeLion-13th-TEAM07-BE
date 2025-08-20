@@ -11,7 +11,7 @@ public record MemberInfoResDto(
         String name,
         String nickName,
         Gender gender,
-        int age
+        Integer age
 ) {
     public static MemberInfoResDto from(Member member) {
         return MemberInfoResDto.builder()
