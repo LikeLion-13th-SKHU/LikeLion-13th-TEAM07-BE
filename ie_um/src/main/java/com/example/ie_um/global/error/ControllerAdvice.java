@@ -5,6 +5,7 @@ import com.example.ie_um.global.error.exception.AccessDeniedGroupException;
 import com.example.ie_um.global.error.exception.AuthGroupException;
 import com.example.ie_um.global.error.exception.InvalidGroupException;
 import com.example.ie_um.global.error.exception.NotFoundGroupException;
+import com.example.ie_um.member.exception.DuplicateNickNameException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
