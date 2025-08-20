@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/image")
+@RequestMapping("api/image")
 @Tag(name = "GCS", description = "이미지 GCS 관련 API")
 public class GCSController {
     private final GCSService gcsService;
