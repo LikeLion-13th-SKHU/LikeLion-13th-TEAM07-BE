@@ -1,5 +1,6 @@
 package com.example.ie_um.resource.api;
 
+import com.example.ie_um.global.annotation.AuthenticatedId;
 import com.example.ie_um.global.template.RspTemplate;
 import com.example.ie_um.resource.api.dto.request.HashTagReqDto;
 import com.example.ie_um.resource.api.dto.response.ResourceListResDto;

@@ -1,5 +1,6 @@
 package com.example.ie_um.global.jwt;
 
+import com.example.ie_um.auth.exception.OAuthLoginFailedException;
 import com.example.ie_um.auth.userInfo.UserInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
@@ -54,7 +55,7 @@ public class JwtProvider {
     public UserInfo parserIdToken(String idToken) {
         String[] tokenParts = idToken.split("\\.");
         if (tokenParts.length != 3) {
-            throw new IllegalArgumentException("유효하지 않은 ID 토큰 형식입니다.");
+            throw new OAuthLoginFailedException("유효하지 않은 ID 토큰 형식입니다.");
         }
 
         String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]), StandardCharsets.UTF_8);
@@ -67,13 +68,12 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser() // 서명, 만료 시간, 포맷 등 검증
+            Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token); // 유효한 토큰이면 여기서 예외 없이 끝남
+                    .parseSignedClaims(token);
             return true;
         } catch (Exception e) {
-            // 서명 불일치, 만료, 형식 오류 등의 경우 모두 false
             return false;
         }
     }

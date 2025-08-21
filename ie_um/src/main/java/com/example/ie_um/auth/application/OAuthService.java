@@ -1,9 +1,8 @@
 package com.example.ie_um.auth.application;
 
-import com.example.ie_um.member.domain.Gender;
+import com.example.ie_um.auth.userInfo.KakaoUserInfo;
 import com.example.ie_um.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import com.example.ie_um.auth.userInfo.OAuthUserInfo;
 import com.example.ie_um.auth.userInfo.UserInfo;
 import com.example.ie_um.auth.client.KakaoOAuthClient;
 import com.example.ie_um.auth.exception.OAuthLoginFailedException;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class OAuthService {
-
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
     private final KakaoOAuthClient kakaoOAuthClient;
@@ -31,9 +29,9 @@ public class OAuthService {
     public TokenDto handleOAuthLogin(String code) {
         String idToken = getIdToken(code);
         UserInfo claims = parseIdToken(idToken);
-        OAuthUserInfo userInfo = getUserInfo(claims);
+        KakaoUserInfo userInfo = new KakaoUserInfo(claims);
         Member member = getOrCreateMember(userInfo);
-        String token = jwtProvider.createToken(member.getEmail(), member.getId()); // 성공
+        String token = jwtProvider.createToken(member.getEmail(), member.getId());
         return new TokenDto(token);
     }
 
@@ -53,21 +51,14 @@ public class OAuthService {
         }
     }
 
-    private OAuthUserInfo getUserInfo(UserInfo claims) {
-        try {
-            return OAuthUserInfo.OAuthUserInfoFactory.getUserInfo("kakao", claims);
-        } catch (Exception e) {
-            throw new OAuthLoginFailedException("UserInfo 생성 실패: " + e.getMessage());
-        }
-    }
-
-    private Member getOrCreateMember(OAuthUserInfo userInfo) {
+    private Member getOrCreateMember(KakaoUserInfo userInfo) {
         Member member = memberRepository.findByEmail(userInfo.getEmail())
                 .orElseGet(() -> memberRepository.save(
                         Member.builder()
                                 .email(userInfo.getEmail())
                                 .name(userInfo.getName())
                                 .nickName(userInfo.getName())
+                                .profileImg(userInfo.getPicture())
                                 .build()
                 ));
 

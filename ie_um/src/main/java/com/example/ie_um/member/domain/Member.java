@@ -32,18 +32,26 @@ public class Member {
     @Column(name = "gender", nullable = true)
     private Gender gender;
 
+    @Column(name = "profile_img")
+    public String profileImg;
+
     @Builder
-    private Member(String email, String name, String nickName) {
+    private Member(String email, String name, String nickName, String profileImg) {
         this.email = email;
         this.name = name;
         this.nickName = nickName;
         this.gender = null;
         this.age = null;
+        this.profileImg = profileImg;
     }
 
     public void update(String nickName, Gender gender, Integer age) {
         this.nickName = nickName;
         this.gender = gender;
         this.age = age;
+    }
+
+    public void updateImage(String profileImg) {
+        this.profileImg = profileImg;
     }
 }
