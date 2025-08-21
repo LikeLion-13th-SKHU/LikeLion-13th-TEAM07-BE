@@ -9,6 +9,8 @@ import com.example.ie_um.global.jwt.dto.TokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.io.IOException;
 
@@ -44,7 +46,10 @@ public class OAuthController {
             summary = "카카오 OAuth 콜백 처리 및 JWT 반환",
             description = "카카오에서 받은 인가 코드로 토큰을 발급하고 사용자에게 JWT 반환"
     )
-
+    @ApiResponses({
+            @ApiResponse(description = "토큰이 성공적으로 발급되었습니다."),
+            @ApiResponse(description = "유효하지 않은 인가 코드입니다.")
+    })
     @GetMapping("/callback/kakao")
     public ResponseEntity<TokenDto> handleCallback(@RequestParam String code) {
         TokenDto tokenDto = oAuthService.handleOAuthLogin(code);

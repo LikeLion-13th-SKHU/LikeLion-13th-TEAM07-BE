@@ -18,6 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
@@ -38,26 +41,28 @@ public class CommunityService {
                 .resourceId(savedPost.getResourceId())
                 .title(savedPost.getTitle())
                 .content(savedPost.getContent())
-                .memberId(savedPost.getAuthor().getId()) // 변경된 부분
-                .memberNickname(savedPost.getAuthor().getNickName()) // 변경된 부분
+                .memberId(savedPost.getAuthor().getId())
+                .memberNickname(savedPost.getAuthor().getNickName())
                 .likesCount(0)
                 .createDate(savedPost.getCreateDate())
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResDto> getAllPosts(Pageable pageable) {
-        Page<Post> posts = postRepository.findAll(pageable);
-        return posts.map(post -> PostResDto.builder()
-                .postId(post.getId())
-                .resourceId(post.getResourceId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .memberId(post.getAuthor().getId()) // 변경된 부분
-                .memberNickname(post.getAuthor().getNickName()) // 변경된 부분
-                .likesCount(post.getLikesCount())
-                .createDate(post.getCreateDate())
-                .build());
+    public List<PostResDto> getAllPosts() {
+        List<Post> posts = postRepository.findAll();
+        return posts.stream()
+                .map(post -> PostResDto.builder()
+                        .postId(post.getId())
+                        .resourceId(post.getResourceId())
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .memberId(post.getAuthor().getId())
+                        .memberNickname(post.getAuthor().getNickName())
+                        .likesCount(post.getLikesCount())
+                        .createDate(post.getCreateDate())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -70,8 +75,8 @@ public class CommunityService {
                 .resourceId(post.getResourceId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .memberId(post.getAuthor().getId()) // 변경된 부분
-                .memberNickname(post.getAuthor().getNickName()) // 변경된 부분
+                .memberId(post.getAuthor().getId())
+                .memberNickname(post.getAuthor().getNickName())
                 .likesCount(post.getLikesCount())
                 .createDate(post.getCreateDate())
                 .build();
@@ -92,8 +97,8 @@ public class CommunityService {
                 .resourceId(post.getResourceId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .memberId(post.getAuthor().getId()) // 변경된 부분
-                .memberNickname(post.getAuthor().getNickName()) // 변경된 부분
+                .memberId(post.getAuthor().getId())
+                .memberNickname(post.getAuthor().getNickName())
                 .likesCount(post.getLikesCount())
                 .createDate(post.getCreateDate())
                 .build();
