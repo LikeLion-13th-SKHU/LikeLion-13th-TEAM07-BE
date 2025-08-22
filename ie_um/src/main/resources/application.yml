@@ -27,7 +27,6 @@ spring:
         credentials:
           location: ${spring.cloud.gcp.storage.credentials.location}
 
-
 swagger:
   server:
     local-url: ${swagger.server.local-url}
