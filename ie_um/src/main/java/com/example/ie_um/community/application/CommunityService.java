@@ -51,9 +51,20 @@ public class CommunityService {
     }
 
     public CommunityListResDto getByMemberId(Long memberId) {
-        List<Community> communityMembers = communityRepository.findByMemberId(memberId);
-        return getCommunityListResDto(communityMembers);
+        List<Community> communities = communityRepository.findByMemberId(memberId);
+        return getCommunityListResDto(communities);
     }
+
+    public CommunityListResDto getByLike(Long memberId) {
+        List<CommunityLike> likes = communityLikeRepository.findByMemberId(memberId);
+
+        List<Community> communities = likes.stream()
+                .map(CommunityLike::getCommunity)
+                .toList();
+
+        return getCommunityListResDto(communities);
+    }
+
 
     @Transactional
     public void update(Long memberId, Long communityId, CommunityUpdateReqDto dto) {

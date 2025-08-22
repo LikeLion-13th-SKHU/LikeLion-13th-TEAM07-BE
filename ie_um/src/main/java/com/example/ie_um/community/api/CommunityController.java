@@ -97,6 +97,19 @@ public class CommunityController {
     }
 
     @Operation(
+            summary = "내가 좋아요 한 커뮤니티 조회",
+            description = "로그인 한 사용자가 좋아요 등록한 커뮤니티를 조회합니다."
+    )
+    @GetMapping("/likes")
+    public RspTemplate<CommunityListResDto> getLike(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "좋아요 한 커뮤니티가 성공적으로 조회됐습니다.",
+                communityService.getByLike(memberId)
+        );
+    }
+
+    @Operation(
             summary = "커뮤니티 수정",
             description = "커뮤니티를 수정합니다. 생성자만 수정할 수 있습니다."
     )
@@ -125,6 +138,10 @@ public class CommunityController {
         );
     }
 
+    @Operation(
+            summary = "커뮤니티 좋아요 등록",
+            description = "커뮤니티에 좋아요를 등록합니다."
+    )
     @PostMapping("/likes/{communityId}")
     public RspTemplate<String> saveLike(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                         @PathVariable(value = "communityId") Long communityId) {
@@ -135,6 +152,10 @@ public class CommunityController {
         );
     }
 
+    @Operation(
+            summary = "커뮤니티 좋아요 취소",
+            description = "커뮤니티에 좋아요를 취소합니다."
+    )
     @DeleteMapping("/likes/{communityId}")
     public RspTemplate<String> deleteLike(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                           @PathVariable(value = "communityId") Long communityId) {
