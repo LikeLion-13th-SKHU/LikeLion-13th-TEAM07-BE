@@ -11,7 +11,8 @@ public record MemberInfoResDto(
         String name,
         String nickName,
         Gender gender,
-        int age
+        Integer age,
+        String profileImg
 ) {
     public static MemberInfoResDto from(Member member) {
         return MemberInfoResDto.builder()
@@ -21,6 +22,7 @@ public record MemberInfoResDto(
                 .nickName(member.getNickName())
                 .gender(member.getGender())
                 .age(member.getAge())
+                .profileImg(member.getProfileImg())
                 .build();
     }
 }

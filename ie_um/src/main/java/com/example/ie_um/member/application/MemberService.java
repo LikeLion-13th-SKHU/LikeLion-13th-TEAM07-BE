@@ -39,5 +39,11 @@ public class MemberService {
 
         member.update(updateReqDto.nickName(), updateReqDto.gender(), updateReqDto.age());
     }
-
+  
+    @Transactional
+    public void updateProfileImg(Long currentMemberId, String profileImg) {
+        Member member = memberRepository.findById(currentMemberId)
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 사용자입니다."));
+        member.updateImage(profileImg);
+    }
 }

@@ -1,15 +1,20 @@
 package com.example.ie_um.member.api;
 
 import com.example.ie_um.global.annotation.AuthenticatedId;
+import com.example.ie_um.global.gcs.application.GCSService;
 import com.example.ie_um.global.template.RspTemplate;
 import com.example.ie_um.member.api.dto.request.MemberUpdateReqDto;
 import com.example.ie_um.member.api.dto.response.MemberInfoResDto;
 import com.example.ie_um.member.application.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,13 +23,14 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final GCSService gcsService;
 
     @Operation(
             summary = "나의 프로필 정보 조회",
             description = "로그인된 사용자의 프로필 정보를 조회합니다."
     )
     @GetMapping
-    public RspTemplate<MemberInfoResDto> getInfo(@AuthenticatedId Long currentMemberId) {
+    public RspTemplate<MemberInfoResDto> getInfo(@Parameter(hidden = true) @AuthenticatedId Long currentMemberId) {
         MemberInfoResDto memberInfo = memberService.getInfo(currentMemberId);
         return new RspTemplate<>(
                 HttpStatus.OK,
@@ -35,11 +41,11 @@ public class MemberController {
 
     @Operation(
             summary = "개인정보 수정",
-            description = "로그인된 사용자의 프로필 정보를 수정합니다."
+            description = "로그인 된 사용자의 프로필 정보를 수정합니다."
     )
     @PutMapping
     public RspTemplate<String> update(
-            @AuthenticatedId Long currentMemberId,
+            @Parameter(hidden = true) @AuthenticatedId Long currentMemberId,
             @RequestBody MemberUpdateReqDto updateReqDto) {
 
         memberService.update(currentMemberId, updateReqDto);
@@ -47,6 +53,21 @@ public class MemberController {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자 프로필 정보가 성공적으로 수정되었습니다."
+        );
+    }
+
+    @Operation(
+            summary = "프로필 사진 수정",
+            description = "로그인 된 사용자의 프로필 사진을 수정합니다."
+    )
+    @PutMapping("/image")
+    public RspTemplate<String> updateProfileImg(@Parameter(hidden = true) @AuthenticatedId Long currentMemberId,
+                                                @RequestParam("file") MultipartFile file) throws IOException {
+        String profileImg = gcsService.uploadFile(currentMemberId, file);
+        memberService.updateProfileImg(currentMemberId, profileImg);
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "사용자 프로필 사진이 성공적으로 수정되었습니다."
         );
     }
 }

@@ -32,6 +32,9 @@ public class Member {
     @Column(name = "gender", nullable = true)
     private Gender gender;
 
+    @Column(name = "profile_img")
+    public String profileImg;
+
     @Builder
     private Member(String email, String name, String nickName) {
         this.email = email;
@@ -45,5 +48,9 @@ public class Member {
         this.nickName = nickName;
         this.gender = gender;
         this.age = age;
+    }
+
+    public void updateImage(String profileImg) {
+        this.profileImg = profileImg;
     }
 }

@@ -5,6 +5,7 @@ import com.example.ie_um.global.template.RspTemplate;
 import com.example.ie_um.resource.api.dto.request.HashTagReqDto;
 import com.example.ie_um.resource.api.dto.response.ResourceListResDto;
 import com.example.ie_um.resource.application.ResourceService;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +37,8 @@ public class ResourcesController {
             )
     )
     @PostMapping()
-    public Mono<RspTemplate<ResourceListResDto>> forwardHashtags(@AuthenticatedId Long id, @RequestBody HashTagReqDto reqDto) {
+    public Mono<RspTemplate<ResourceListResDto>> forwardHashtags(@Parameter(hidden = true) @AuthenticatedId Long memberId,
+                                                                 @RequestBody HashTagReqDto reqDto) {
         return resourceService.forwardHashtags(reqDto)
                 .map(data -> new RspTemplate<>(
                         HttpStatus.OK,
