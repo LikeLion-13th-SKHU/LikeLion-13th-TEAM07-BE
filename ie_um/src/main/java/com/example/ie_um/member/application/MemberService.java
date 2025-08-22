@@ -39,7 +39,7 @@ public class MemberService {
 
         member.update(updateReqDto.nickName(), updateReqDto.gender(), updateReqDto.age());
     }
-
+  
     @Transactional
     public void updateProfileImg(Long currentMemberId, String profileImg) {
         Member member = memberRepository.findById(currentMemberId)
