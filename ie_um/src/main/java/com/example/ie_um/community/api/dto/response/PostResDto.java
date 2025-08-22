@@ -13,19 +13,19 @@ public class PostResDto {
     private Long resourceId;
     private String title;
     private String content;
-    private Long memberId; // 변경된 부분
-    private String memberNickname; // 변경된 부분
+    private Long memberId;
+    private String memberNickname;
     private int likesCount;
     private LocalDateTime createDate;
 
     @Builder
-    public PostResDto(Long postId, Long resourceId, String title, String content, Long memberId, String memberNickname, int likesCount, LocalDateTime createDate) { // 변경된 부분
+    public PostResDto(Long postId, Long resourceId, String title, String content, Long memberId, String memberNickname, int likesCount, LocalDateTime createDate) {
         this.postId = postId;
         this.resourceId = resourceId;
         this.title = title;
         this.content = content;
-        this.memberId = memberId; // 변경된 부분
-        this.memberNickname = memberNickname; // 변경된 부분
+        this.memberId = memberId;
+        this.memberNickname = memberNickname;
         this.likesCount = likesCount;
         this.createDate = createDate;
     }

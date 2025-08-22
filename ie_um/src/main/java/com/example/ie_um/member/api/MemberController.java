@@ -49,4 +49,34 @@ public class MemberController {
                 "사용자 프로필 정보가 성공적으로 수정되었습니다."
         );
     }
+
+    // 내가 쓴 게시글 조회 기능 추가
+    @Operation(
+            summary = "내가 쓴 게시글 조회",
+            description = "로그인된 사용자가 작성한 모든 게시글을 조회합니다."
+    )
+    @GetMapping("/posts")
+    public RspTemplate<List<PostResDto>> getMyPosts(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
+        List<PostResDto> myPosts = memberService.getMyPosts(memberId);
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "내가 쓴 게시글을 성공적으로 조회했습니다.",
+                myPosts
+        );
+    }
+
+    // 내가 좋아요 한 게시글 조회 기능 추가
+    @Operation(
+            summary = "좋아요 한 게시글 조회",
+            description = "로그인된 사용자가 좋아요를 누른 모든 게시글을 조회합니다."
+    )
+    @GetMapping("/likes")
+    public RspTemplate<List<PostResDto>> getMyLikedPosts(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
+        List<PostResDto> likedPosts = memberService.getLikedPosts(memberId);
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "좋아요 한 게시글을 성공적으로 조회했습니다.",
+                likedPosts
+        );
+    }
 }
