@@ -5,8 +5,8 @@ import com.example.ie_um.community.api.dto.request.CommunityUpdateReqDto;
 import com.example.ie_um.community.api.dto.response.CommunityInfoResDto;
 import com.example.ie_um.community.api.dto.response.CommunityListResDto;
 import com.example.ie_um.community.domain.Community;
-import com.example.ie_um.community.domain.CommunityMember;
-import com.example.ie_um.community.domain.repository.CommunityMemberRepository;
+import com.example.ie_um.community.domain.CommunityLike;
+import com.example.ie_um.community.domain.repository.CommunityLikeRepository;
 import com.example.ie_um.community.domain.repository.CommunityRepository;
 import com.example.ie_um.community.exception.CommunityInvalidException;
 import com.example.ie_um.community.exception.CommunityNotFoundException;
@@ -25,7 +25,7 @@ import java.util.List;
 public class CommunityService {
     private final MemberRepository memberRepository;
     private final CommunityRepository communityRepository;
-    private final CommunityMemberRepository communityMemberRepository;
+    private final CommunityLikeRepository communityLikeRepository;
 
     @Transactional
     public void create(Long memberId, CommunityCreateReqDto dto) {
@@ -34,15 +34,10 @@ public class CommunityService {
                 .title(dto.title())
                 .content(dto.content())
                 .address(dto.address())
-                .build();
-
-        CommunityMember communityMember = CommunityMember.builder()
                 .member(member)
-                .community(community)
                 .build();
 
         communityRepository.save(community);
-        communityMemberRepository.save(communityMember);
     }
 
     public CommunityInfoResDto getDetail(Long memberId, Long communityId) {
@@ -56,35 +51,42 @@ public class CommunityService {
     }
 
     public CommunityListResDto getByMemberId(Long memberId) {
-        List<CommunityMember> communityMembers = communityMemberRepository.findByMemberId(memberId);
-
-        List<Community> communities = communityMembers.stream()
-                .map(CommunityMember::getCommunity)
-                .toList();
-
-        return getCommunityListResDto(communities);
+        List<Community> communityMembers = communityRepository.findByMemberId(memberId);
+        return getCommunityListResDto(communityMembers);
     }
 
     @Transactional
-    public void update(Long memberId, Long communityId, CommunityUpdateReqDto communityUpdateReqDto) {
-        validateOwner(memberId, communityId);
-        Community community = findCommunityById(communityId);
-        community.update(communityUpdateReqDto.title(),
-                communityUpdateReqDto.content(),
-                communityUpdateReqDto.address());
+    public void update(Long memberId, Long communityId, CommunityUpdateReqDto dto) {
+        Community community = validateOwner(memberId, communityId);
+        community.update(dto.title(), dto.content(), dto.address());
     }
 
     @Transactional
     public void delete(Long memberId, Long communityId) {
-        validateOwner(memberId, communityId);
+        Community community = validateOwner(memberId, communityId);
+        communityRepository.delete(community);
+    }
 
+    @Transactional
+    public void saveLike(Long memberId, Long communityId) {
+        if (communityLikeRepository.findByMemberIdAndCommunityId(memberId, communityId).isPresent()) {
+            return;
+        }
+
+        Member member = findMemberById(memberId);
         Community community = findCommunityById(communityId);
 
-        CommunityMember communityMember = communityMemberRepository.findByMemberIdAndCommunityId(memberId, communityId)
-                .orElseThrow(() -> new CommunityNotFoundException("존재하지 않는 게시물입니다."));
+        CommunityLike communityLike = CommunityLike.builder()
+                .member(member)
+                .community(community)
+                .build();
 
-        communityMemberRepository.delete(communityMember);
-        communityRepository.delete(community);
+        communityLikeRepository.save(communityLike);
+    }
+
+    @Transactional
+    public void deleteLike(Long memberId, Long communityId) {
+        communityLikeRepository.deleteByMemberIdAndCommunityId(memberId, communityId);
     }
 
     private CommunityListResDto getCommunityListResDto(List<Community> communityList) {
@@ -104,10 +106,11 @@ public class CommunityService {
                 .orElseThrow(() -> new CommunityNotFoundException("존재하지 않는 게시물입니다."));
     }
 
-    private void validateOwner(Long memberId, Long communityId) {
-        CommunityMember communityMember = communityMemberRepository.findByMemberIdAndCommunityId(memberId, communityId)
-                .orElseThrow(() -> new CommunityNotFoundException("존재하지 않는 게시물입니다."));
-        if (communityMember.getMember().getId() != memberId)
-            throw new CommunityInvalidException("생성자만 수정/삭제가 가능합니다.");
+    private Community validateOwner(Long memberId, Long communityId) {
+        Community community = findCommunityById(communityId);
+        if (!community.getMember().getId().equals(memberId)) {
+            throw new CommunityInvalidException("생성자만 수정/삭제할 수 있습니다.");
+        }
+        return community;
     }
 }

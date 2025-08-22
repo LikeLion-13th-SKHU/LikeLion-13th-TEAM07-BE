@@ -124,4 +124,24 @@ public class CommunityController {
                 "커뮤니티가 성공적으로 삭제되었습니다."
         );
     }
+
+    @PostMapping("/likes/{communityId}")
+    public RspTemplate<String> saveLike(@Parameter(hidden = true) @AuthenticatedId Long memberId,
+                                        @PathVariable(value = "communityId") Long communityId) {
+        communityService.saveLike(memberId, communityId);
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "커뮤니티 좋아요가 성공적으로 등록되었습니다."
+        );
+    }
+
+    @DeleteMapping("/likes/{communityId}")
+    public RspTemplate<String> deleteLike(@Parameter(hidden = true) @AuthenticatedId Long memberId,
+                                          @PathVariable(value = "communityId") Long communityId) {
+        communityService.deleteLike(memberId, communityId);
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "커뮤니티 좋아요가 성공적으로 취소되었습니다."
+        );
+    }
 }
