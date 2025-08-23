@@ -1,7 +1,6 @@
 package com.example.ie_um.accompany.application;
 
-import com.example.ie_um.accompany.api.dto.request.AccompanyCreateReqDto;
-import com.example.ie_um.accompany.api.dto.request.AccompanyUpdateReqDto;
+import com.example.ie_um.accompany.api.dto.request.AccompanyReqDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyApplyListResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyApplyResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
@@ -17,12 +16,13 @@ import com.example.ie_um.accompany.exception.AccompanyPersonnelInvalidGroupExcep
 import com.example.ie_um.member.domain.Member;
 import com.example.ie_um.member.exception.MemberNotFoundException;
 import com.example.ie_um.member.repository.MemberRepository;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,16 +33,16 @@ public class AccompanyService {
     private final AccompanyMemberRepository accompanyMemberRepository;
 
     @Transactional
-    public void create(Long memberId, AccompanyCreateReqDto dto) {
+    public void create(Long memberId, AccompanyReqDto accompanyReqDto) {
         Member member = findMemberById(memberId);
 
         Accompany accompany = Accompany.builder()
-                .title(dto.title())
-                .content(dto.content())
-                .maxPersonnel(dto.maxPersonnel())
+                .title(accompanyReqDto.title())
+                .content(accompanyReqDto.content())
+                .maxPersonnel(accompanyReqDto.maxPersonnel())
                 .currentPersonnel(1)
-                .time(dto.time())
-                .address(dto.address())
+                .time(accompanyReqDto.time())
+                .address(accompanyReqDto.address())
                 .build();
 
         AccompanyMember accompanyMember = AccompanyMember.builder()
@@ -55,47 +55,63 @@ public class AccompanyService {
         accompanyMemberRepository.save(accompanyMember);
     }
 
-    public AccompanyInfoResDto getDetail(Long accompanyId) {
+    public AccompanyInfoResDto getDetail(Long memberId, Long accompanyId) {
         Accompany accompany = findAccompanyById(accompanyId);
-        return AccompanyInfoResDto.from(accompany);
+
+        String userRole = accompanyMemberRepository.findByMemberIdAndAccompanyId(memberId, accompanyId)
+                .map(accompanyMember -> accompanyMember.getRole().name()).orElse(null);
+
+        return AccompanyInfoResDto.from(accompany, userRole);
     }
 
-    public AccompanyListResDto getAll() {
+    public AccompanyListResDto getAll(Long memberId) {
         List<Accompany> accompanyList = accompanyRepository.findAll();
-        return getAccompanyListResDto(accompanyList);
+        return getAccompanyListResDto(accompanyList, memberId);
     }
 
     public AccompanyListResDto getByMemberId(Long memberId) {
-        List<AccompanyMember> accompanyMembers = accompanyMemberRepository.findByMemberIdAndRole(memberId, AccompanyRole.ACCEPTED);
-
+        List<AccompanyRole> roles = Arrays.asList(AccompanyRole.OWNER, AccompanyRole.ACCEPTED);
+        List<AccompanyMember> accompanyMembers = accompanyMemberRepository.findByMemberIdAndRoleIn(memberId, roles);
         List<Accompany> accompanyList = accompanyMembers.stream()
                 .map(AccompanyMember::getAccompany)
                 .toList();
-
-        return getAccompanyListResDto(accompanyList);
+        return getAccompanyListResDto(accompanyList, memberId);
     }
 
-    public AccompanyApplyListResDto getApplied(Long memberId) {
+    public AccompanyListResDto getApplied(Long memberId) {
         List<AccompanyRole> roles = Arrays.asList(AccompanyRole.PENDING, AccompanyRole.REJECTED);
-        List<AccompanyMember> appliedMembers = accompanyMemberRepository.findByMemberIdAndRoleIn(memberId, roles);
+        List<AccompanyMember> accompanyMembers = accompanyMemberRepository.findByMemberIdAndRoleIn(memberId, roles);
+        List<Accompany> accompanyList = accompanyMembers.stream()
+                .map(AccompanyMember::getAccompany)
+                .toList();
+        return getAccompanyListResDto(accompanyList, memberId);
+    }
 
-        List<AccompanyApplyResDto> appliedGroupDtos = appliedMembers.stream()
+    public AccompanyApplyListResDto getAppliedMember(Long ownerId, Long accompanyId) {
+        validateOwner(ownerId, accompanyId);
+        List<AccompanyMember> applicants = accompanyMemberRepository
+                .findByAccompanyIdAndRoleWithMember(accompanyId, AccompanyRole.PENDING);
+
+        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(ownerId, accompanyId)
+                .orElseThrow(() -> new AccompanyInvalidGroupException("참여자가 아닙니다."));
+
+        List<AccompanyApplyResDto> applicantInfos = applicants.stream()
                 .map(AccompanyApplyResDto::from)
                 .toList();
 
-        return AccompanyApplyListResDto.from(appliedGroupDtos);
+        return AccompanyApplyListResDto.of(accompanyId, accompanyMember.getRole().toString(), applicantInfos);
     }
 
     @Transactional
-    public void update(Long memberId, Long accompanyId, AccompanyUpdateReqDto accompanyUpdateReqDto) {
+    public void update(Long memberId, Long accompanyId, AccompanyReqDto accompanyReqDto) {
         validateOwner(memberId, accompanyId);
         Accompany accompany = findAccompanyById(accompanyId);
 
-        accompany.update(accompanyUpdateReqDto.title(),
-                accompanyUpdateReqDto.content(),
-                accompanyUpdateReqDto.maxPersonnel(),
-                accompanyUpdateReqDto.currentPersonnel(),
-                accompanyUpdateReqDto.time());
+        accompany.update(accompanyReqDto.title(),
+                accompanyReqDto.content(),
+                accompanyReqDto.maxPersonnel(),
+                accompanyReqDto.time(),
+                accompanyReqDto.address());
     }
 
     @Transactional
@@ -160,7 +176,7 @@ public class AccompanyService {
 
         Accompany accompany = applicant.getAccompany();
         if (accompany.getMaxPersonnel() <= accompany.getCurrentPersonnel()) {
-            throw new AccompanyPersonnelInvalidGroupException("정원 초과");
+            throw new AccompanyPersonnelInvalidGroupException("정원이 초과되었습니다.");
         }
 
         applicant.updateAccompanyStatus(AccompanyRole.ACCEPTED);
@@ -175,11 +191,11 @@ public class AccompanyService {
     }
 
     private void validateOwner(Long memberId, Long accompanyId) {
-        AccompanyMember member = accompanyMemberRepository
+        AccompanyMember accompanyMember = accompanyMemberRepository
                 .findByMemberIdAndAccompanyId(memberId, accompanyId)
                 .orElseThrow(() -> new AccompanyInvalidGroupException("참여자가 아닙니다."));
 
-        if (member.getRole() != AccompanyRole.OWNER) {
+        if (accompanyMember.getRole() != AccompanyRole.OWNER) {
             throw new AccompanyInvalidGroupException("생성자만 가능합니다.");
         }
     }
@@ -197,9 +213,20 @@ public class AccompanyService {
         return applicant;
     }
 
-    private AccompanyListResDto getAccompanyListResDto(List<Accompany> accompanyList) {
+    private AccompanyListResDto getAccompanyListResDto(List<Accompany> accompanyList, Long memberId) {
+        List<AccompanyMember> userMemberships = accompanyMemberRepository.findByMemberId(memberId);
+
+        Map<Long, String> userRoleMap = userMemberships.stream()
+                .collect(Collectors.toMap(
+                        am -> am.getAccompany().getId(),
+                        am -> am.getRole().name()
+                ));
+
         List<AccompanyInfoResDto> accompanyInfoDtos = accompanyList.stream()
-                .map(AccompanyInfoResDto::from)
+                .map(accompany -> {
+                    String userRole = userRoleMap.get(accompany.getId());
+                    return AccompanyInfoResDto.from(accompany, userRole);
+                })
                 .toList();
 
         return AccompanyListResDto.from(accompanyInfoDtos);

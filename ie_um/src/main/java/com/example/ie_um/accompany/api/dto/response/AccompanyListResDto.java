@@ -1,8 +1,7 @@
 package com.example.ie_um.accompany.api.dto.response;
 
-import lombok.Builder;
-
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 public record AccompanyListResDto(

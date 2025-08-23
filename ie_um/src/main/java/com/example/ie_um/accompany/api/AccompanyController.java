@@ -1,7 +1,6 @@
 package com.example.ie_um.accompany.api;
 
-import com.example.ie_um.accompany.api.dto.request.AccompanyCreateReqDto;
-import com.example.ie_um.accompany.api.dto.request.AccompanyUpdateReqDto;
+import com.example.ie_um.accompany.api.dto.request.AccompanyReqDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyApplyListResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyInfoResDto;
 import com.example.ie_um.accompany.api.dto.response.AccompanyListResDto;
@@ -17,7 +16,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -33,12 +39,12 @@ public class AccompanyController {
     )
     @PostMapping
     public RspTemplate<String> create(@Parameter(hidden = true) @AuthenticatedId Long memberId,
-                                      @RequestBody AccompanyCreateReqDto accompanyCreateReqDto) {
-         accompanyService.create(memberId, accompanyCreateReqDto);
-         return new RspTemplate<>(
-                 HttpStatus.CREATED,
-                 "동행그룹이 성공적으로 생성되었습니다."
-         );
+                                      @RequestBody AccompanyReqDto accompanyReqDto) {
+        accompanyService.create(memberId, accompanyReqDto);
+        return new RspTemplate<>(
+                HttpStatus.CREATED,
+                "동행그룹이 성공적으로 생성되었습니다."
+        );
     }
 
     @Operation(
@@ -57,7 +63,7 @@ public class AccompanyController {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "동행그룹 상세정보가 성공적으로 조회되었습니다.",
-                accompanyService.getDetail(accompanyId)
+                accompanyService.getDetail(memberId, accompanyId)
         );
     }
 
@@ -76,7 +82,7 @@ public class AccompanyController {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "동행그룹 전체가 성공적으로 조회되었습니다.",
-                accompanyService.getAll()
+                accompanyService.getAll(memberId)
         );
     }
 
@@ -106,15 +112,30 @@ public class AccompanyController {
     @ApiResponse(
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = AccompanyApplyListResDto.class)
+                    schema = @Schema(implementation = AccompanyListResDto.class)
             )
     )
     @GetMapping("/apply")
-    public RspTemplate<AccompanyApplyListResDto> getApplied(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
+    public RspTemplate<AccompanyListResDto> getApplied(@Parameter(hidden = true) @AuthenticatedId Long memberId) {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자가 신청한 동행그룹이 성공적으로 조회되었습니다.",
                 accompanyService.getApplied(memberId)
+        );
+    }
+
+    @Operation(
+            summary = "동행그룹 신청자 목록",
+            description = "로그인 한 생성한 동행그룹에 신청한 사용자 목록을 조회합니다. 생성자(OWNER)만 가능합니다."
+    )
+    @GetMapping("/apply/member/{accompanyId}")
+    public RspTemplate<AccompanyApplyListResDto> getAppliedMember(
+            @Parameter(hidden = true) @AuthenticatedId Long memberId,
+            @PathVariable(value = "accompanyId") Long accompanyId) {
+        return new RspTemplate<>(
+                HttpStatus.OK,
+                "로그인 한 사용자가 생성한 동행그룹에 신청한 사용자 목록이 성공적으로 조회되었습니다.",
+                accompanyService.getAppliedMember(memberId, accompanyId)
         );
     }
 
@@ -125,8 +146,8 @@ public class AccompanyController {
     @PutMapping("/{accompanyId}")
     public RspTemplate<String> update(@Parameter(hidden = true) @AuthenticatedId Long memberId,
                                       @PathVariable(value = "accompanyId") Long accompanyId,
-                                      @RequestBody AccompanyUpdateReqDto accompanyUpdateReqDto) {
-        accompanyService.update(memberId, accompanyId, accompanyUpdateReqDto);
+                                      @RequestBody AccompanyReqDto accompanyReqDto) {
+        accompanyService.update(memberId, accompanyId, accompanyReqDto);
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "동행그룹이 성공적으로 수정되었습니다."

@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,13 +31,13 @@ public class Accompany extends BaseTimeEntity {
     private int currentPersonnel;
 
     @Column(name = "time")
-    private String time;
+    private LocalDateTime time;
 
     @Column(name = "address")
     private String address;
 
     @Builder
-    private Accompany(String title, String content, int maxPersonnel, int currentPersonnel, String time, String address) {
+    private Accompany(String title, String content, int maxPersonnel, int currentPersonnel, LocalDateTime time, String address) {
         this.title = title;
         this.content = content;
         this.maxPersonnel = maxPersonnel;
@@ -44,12 +46,12 @@ public class Accompany extends BaseTimeEntity {
         this.address = address;
     }
 
-    public void update(String title, String content, int maxPersonnel, int currentPersonnel, String time) {
+    public void update(String title, String content, int maxPersonnel, LocalDateTime time, String address) {
         this.title = title;
         this.content = content;
         this.maxPersonnel = maxPersonnel;
-        this.currentPersonnel = currentPersonnel;
         this.time = time;
+        this.address = address;
     }
 
     public void increaseCurrentPersonnel() {

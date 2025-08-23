@@ -36,12 +36,13 @@ public class Member {
     public String profileImg;
 
     @Builder
-    private Member(String email, String name, String nickName) {
+    private Member(String email, String name, String nickName, String profileImg) {
         this.email = email;
         this.name = name;
         this.nickName = nickName;
         this.gender = null;
         this.age = null;
+        this.profileImg = profileImg;
     }
 
     public void update(String nickName, Gender gender, Integer age) {
