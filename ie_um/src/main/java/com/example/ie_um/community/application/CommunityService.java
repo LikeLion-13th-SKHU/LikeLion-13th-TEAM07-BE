@@ -9,6 +9,7 @@ import com.example.ie_um.community.domain.CommunityLike;
 import com.example.ie_um.community.domain.repository.CommunityLikeRepository;
 import com.example.ie_um.community.domain.repository.CommunityRepository;
 import com.example.ie_um.community.exception.CommunityInvalidException;
+import com.example.ie_um.community.exception.CommunityLikeNotFoundException;
 import com.example.ie_um.community.exception.CommunityNotFoundException;
 import com.example.ie_um.member.domain.Member;
 import com.example.ie_um.member.exception.MemberNotFoundException;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,7 @@ public class CommunityService {
                 .content(dto.content())
                 .address(dto.address())
                 .member(member)
+                .likeCount(0)
                 .build();
 
         communityRepository.save(community);
@@ -42,29 +46,30 @@ public class CommunityService {
 
     public CommunityInfoResDto getDetail(Long memberId, Long communityId) {
         Community community = findCommunityById(communityId);
-        return CommunityInfoResDto.from(community);
+        boolean isLikedByCurrentUser = communityLikeRepository.existsByMemberIdAndCommunityId(memberId, communityId);
+        return CommunityInfoResDto.from(community, isLikedByCurrentUser);
     }
 
-    public CommunityListResDto getAll() {
+    public CommunityListResDto getAll(Long memberId) {
         List<Community> communities = communityRepository.findAll();
-        return getCommunityListResDto(communities);
+
+        return getCommunityListResDto(communities, memberId);
     }
 
     public CommunityListResDto getByMemberId(Long memberId) {
         List<Community> communities = communityRepository.findByMemberId(memberId);
-        return getCommunityListResDto(communities);
+        return getCommunityListResDto(communities, memberId);
     }
 
     public CommunityListResDto getByLike(Long memberId) {
-        List<CommunityLike> likes = communityLikeRepository.findByMemberId(memberId);
+        List<CommunityLike> likes = communityLikeRepository.findByMemberIdWithCommunity(memberId);
 
         List<Community> communities = likes.stream()
                 .map(CommunityLike::getCommunity)
                 .toList();
 
-        return getCommunityListResDto(communities);
+        return getCommunityListResDto(communities, memberId);
     }
-
 
     @Transactional
     public void update(Long memberId, Long communityId, CommunityUpdateReqDto dto) {
@@ -75,6 +80,8 @@ public class CommunityService {
     @Transactional
     public void delete(Long memberId, Long communityId) {
         Community community = validateOwner(memberId, communityId);
+
+        communityLikeRepository.deleteByCommunityId(communityId);
         communityRepository.delete(community);
     }
 
@@ -92,17 +99,31 @@ public class CommunityService {
                 .community(community)
                 .build();
 
+
+        community.increasedLikeCount();
         communityLikeRepository.save(communityLike);
     }
 
     @Transactional
     public void deleteLike(Long memberId, Long communityId) {
-        communityLikeRepository.deleteByMemberIdAndCommunityId(memberId, communityId);
+        CommunityLike communityLike = communityLikeRepository.findByMemberIdAndCommunityId(memberId, communityId)
+                .orElseThrow(() -> new CommunityLikeNotFoundException("좋아요 기록을 찾을 수 없습니다."));
+
+        Community community = communityLike.getCommunity();
+        community.decreasedLikeCount();
+        communityLikeRepository.delete(communityLike);
     }
 
-    private CommunityListResDto getCommunityListResDto(List<Community> communityList) {
+    private CommunityListResDto getCommunityListResDto(List<Community> communityList, Long memberId) {
+        Set<Long> likedCommunityIds = communityLikeRepository.findByMemberId(memberId).stream()
+                .map(like -> like.getCommunity().getId())
+                .collect(Collectors.toSet());
+
         List<CommunityInfoResDto> communityInfoDtos = communityList.stream()
-                .map(CommunityInfoResDto::from)
+                .map(community -> {
+                    boolean isLike = likedCommunityIds.contains(community.getId());
+                    return CommunityInfoResDto.from(community, isLike);
+                })
                 .toList();
         return CommunityListResDto.from(communityInfoDtos);
     }

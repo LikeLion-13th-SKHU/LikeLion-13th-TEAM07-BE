@@ -2,31 +2,25 @@ package com.example.ie_um.accompany.api.dto.response;
 
 import com.example.ie_um.accompany.domain.Accompany;
 import com.example.ie_um.accompany.domain.AccompanyMember;
-import com.example.ie_um.resource.api.dto.response.ResourceResDto;
+import com.example.ie_um.member.domain.Gender;
 import lombok.Builder;
 
 @Builder
 public record AccompanyApplyResDto(
-        Long id,
-        String title,
-        String content,
-        int maxPersonnel,
-        int currentPersonnel,
-        String time,
-        String address,
+        Long memberId,
+        String nickName,
+        Integer age,
+        Gender gender,
         String role
 ) {
     public static AccompanyApplyResDto from(AccompanyMember accompanyMember) {
         Accompany accompany = accompanyMember.getAccompany();
         return new AccompanyApplyResDto(
-                accompany.getId(),
-                accompany.getTitle(),
-                accompany.getContent(),
-                accompany.getMaxPersonnel(),
-                accompany.getCurrentPersonnel(),
-                accompany.getTime(),
-                accompany.getAddress(),
-                accompanyMember.getRole().getDescription()
+                accompanyMember.getMember().getId(),
+                accompanyMember.getMember().getNickName(),
+                accompanyMember.getMember().getAge(),
+                accompanyMember.getMember().getGender(),
+                accompanyMember.getRole().name()
         );
     }
 }

@@ -1,7 +1,7 @@
 package com.example.ie_um.accompany.api.dto.response;
 
 import com.example.ie_um.accompany.domain.Accompany;
-import com.example.ie_um.resource.api.dto.response.ResourceResDto;
+import java.time.format.DateTimeFormatter;
 import lombok.Builder;
 
 @Builder
@@ -12,17 +12,19 @@ public record AccompanyInfoResDto(
         int maxPersonnel,
         int currentPersonnel,
         String time,
-        String address
+        String address,
+        String role
 ) {
-    public static AccompanyInfoResDto from(Accompany accompany) {
+    public static AccompanyInfoResDto from(Accompany accompany, String role) {
         return new AccompanyInfoResDto(
                 accompany.getId(),
                 accompany.getTitle(),
                 accompany.getContent(),
                 accompany.getMaxPersonnel(),
                 accompany.getCurrentPersonnel(),
-                accompany.getTime(),
-                accompany.getAddress()
+                accompany.getTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                accompany.getAddress(),
+                role
         );
     }
 }

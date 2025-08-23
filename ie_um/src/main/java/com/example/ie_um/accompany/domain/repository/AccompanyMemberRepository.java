@@ -3,15 +3,13 @@ package com.example.ie_um.accompany.domain.repository;
 import com.example.ie_um.accompany.domain.Accompany;
 import com.example.ie_um.accompany.domain.AccompanyMember;
 import com.example.ie_um.accompany.domain.AccompanyRole;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
-
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AccompanyMemberRepository extends JpaRepository<AccompanyMember, Long> {
-    List<AccompanyMember> findByMemberId(Long memberId);
-
     boolean existsByMemberIdAndAccompany(Long memberId, Accompany accompany);
 
     void deleteByAccompanyId(Long accompanyId);
@@ -20,7 +18,11 @@ public interface AccompanyMemberRepository extends JpaRepository<AccompanyMember
 
     Optional<AccompanyMember> findByMemberIdAndAccompany(Long memberId, Accompany accompany);
 
-    List<AccompanyMember> findByMemberIdAndRole(Long memberId, AccompanyRole accompanyRole);
-
     List<AccompanyMember> findByMemberIdAndRoleIn(Long memberId, List<AccompanyRole> statuses);
+
+    List<AccompanyMember> findByMemberId(Long memberId);
+
+    @Query("SELECT am FROM AccompanyMember am JOIN FETCH am.member WHERE am.accompany.id = :accompanyId AND am.role = :role")
+    List<AccompanyMember> findByAccompanyIdAndRoleWithMember(@Param("accompanyId") Long accompanyId,
+                                                             @Param("role") AccompanyRole role);
 }

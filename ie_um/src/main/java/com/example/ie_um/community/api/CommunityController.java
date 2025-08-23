@@ -73,7 +73,7 @@ public class CommunityController {
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "커뮤니티 전체가 성공적으로 조회되었습니다.",
-                communityService.getAll()
+                communityService.getAll(memberId)
         );
     }
 

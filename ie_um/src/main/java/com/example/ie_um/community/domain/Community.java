@@ -30,17 +30,28 @@ public class Community extends BaseTimeEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Column(name = "like_count")
+    private Integer likeCount;
+
     @Builder
-    private Community(String title, String content, String address, Member member) {
+    private Community(String title, String content, String address, Member member, Integer likeCount) {
         this.title = title;
         this.content = content;
         this.address = address;
         this.member = member;
+        this.likeCount = likeCount;
     }
 
     public void update(String title, String content, String address) {
         this.title = title;
         this.content = content;
         this.address = address;
+    }
+
+    public void increasedLikeCount() {
+        this.likeCount++;
+    }
+    public void decreasedLikeCount() {
+        this.likeCount--;
     }
 }
