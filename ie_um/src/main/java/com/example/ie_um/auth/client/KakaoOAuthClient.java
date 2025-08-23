@@ -1,6 +1,7 @@
 package com.example.ie_um.auth.client;
 
 import com.example.ie_um.auth.exception.OAuthLoginFailedException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -32,7 +31,7 @@ public class KakaoOAuthClient {
                 "&response_type=code&" +
                 "client_id=" + clientId +
                 "&redirect_uri=" + redirectUri +
-                "&scope=openid,profile_nickname,profile_image,account_email"; // id_token을 받기 위해 openid scope 추가
+                "&scope=openid,profile_nickname,profile_image,account_email";
     }
 
     public String getIdToken(String code) {
@@ -53,7 +52,9 @@ public class KakaoOAuthClient {
                 .block();
 
         if (response == null || response.containsKey("error")) {
-            String errorDescription = response != null ? response.getOrDefault("error_description", "No description provided.").toString() : "Response is null.";
+            String errorDescription =
+                    response != null ? response.getOrDefault("error_description", "No description provided.").toString()
+                            : "Response is null.";
             throw new OAuthLoginFailedException("카카오 토큰 발급에 실패했습니다. 원인: " + errorDescription);
         }
 

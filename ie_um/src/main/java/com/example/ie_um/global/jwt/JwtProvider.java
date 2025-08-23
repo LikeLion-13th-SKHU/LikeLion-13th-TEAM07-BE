@@ -8,15 +8,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +32,6 @@ public class JwtProvider {
 
     @PostConstruct
     public void init() {
-        // secret 값을 Base64 디코딩하여 Key 생성
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -41,7 +39,6 @@ public class JwtProvider {
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         Date now = new Date();
         Date expiry = new Date(now.getTime() + this.expiry);
-
 
         return Jwts.builder()
                 .subject(email)

@@ -14,8 +14,8 @@ import com.example.ie_um.accompany.exception.AccompanyInvalidGroupException;
 import com.example.ie_um.accompany.exception.AccompanyNotFoundException;
 import com.example.ie_um.accompany.exception.AccompanyPersonnelInvalidGroupException;
 import com.example.ie_um.member.domain.Member;
+import com.example.ie_um.member.domain.repository.MemberRepository;
 import com.example.ie_um.member.exception.MemberNotFoundException;
-import com.example.ie_um.member.repository.MemberRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -89,13 +89,13 @@ public class AccompanyService {
 
     public AccompanyApplyListResDto getAppliedMember(Long ownerId, Long accompanyId) {
         validateOwner(ownerId, accompanyId);
-        List<AccompanyMember> applicants = accompanyMemberRepository
+        List<AccompanyMember> accompanyMembers = accompanyMemberRepository
                 .findByAccompanyIdAndRoleWithMember(accompanyId, AccompanyRole.PENDING);
 
         AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(ownerId, accompanyId)
                 .orElseThrow(() -> new AccompanyInvalidGroupException("참여자가 아닙니다."));
 
-        List<AccompanyApplyResDto> applicantInfos = applicants.stream()
+        List<AccompanyApplyResDto> applicantInfos = accompanyMembers.stream()
                 .map(AccompanyApplyResDto::from)
                 .toList();
 
@@ -172,14 +172,14 @@ public class AccompanyService {
 
     @Transactional
     public void accept(Long ownerId, Long accompanyId, Long applicantId) {
-        AccompanyMember applicant = findAndValidatePendingApplicant(ownerId, accompanyId, applicantId);
+        AccompanyMember accompanyMember = findAndValidatePendingApplicant(ownerId, accompanyId, applicantId);
 
-        Accompany accompany = applicant.getAccompany();
+        Accompany accompany = accompanyMember.getAccompany();
         if (accompany.getMaxPersonnel() <= accompany.getCurrentPersonnel()) {
             throw new AccompanyPersonnelInvalidGroupException("정원이 초과되었습니다.");
         }
 
-        applicant.updateAccompanyStatus(AccompanyRole.ACCEPTED);
+        accompanyMember.updateAccompanyStatus(AccompanyRole.ACCEPTED);
         accompany.increaseCurrentPersonnel();
     }
 
@@ -203,14 +203,14 @@ public class AccompanyService {
     private AccompanyMember findAndValidatePendingApplicant(Long ownerId, Long accompanyId, Long applicantId) {
         validateOwner(ownerId, accompanyId);
 
-        AccompanyMember applicant = accompanyMemberRepository
+        AccompanyMember accompanyMember = accompanyMemberRepository
                 .findByMemberIdAndAccompanyId(applicantId, accompanyId)
                 .orElseThrow(() -> new AccompanyInvalidGroupException("신청 내역이 없습니다."));
 
-        if (applicant.getRole() != AccompanyRole.PENDING) {
+        if (accompanyMember.getRole() != AccompanyRole.PENDING) {
             throw new AccompanyInvalidGroupException("이미 처리된 신청입니다.");
         }
-        return applicant;
+        return accompanyMember;
     }
 
     private AccompanyListResDto getAccompanyListResDto(List<Accompany> accompanyList, Long memberId) {

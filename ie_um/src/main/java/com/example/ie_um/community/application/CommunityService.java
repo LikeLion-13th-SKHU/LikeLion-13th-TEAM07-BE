@@ -1,7 +1,6 @@
 package com.example.ie_um.community.application;
 
-import com.example.ie_um.community.api.dto.request.CommunityCreateReqDto;
-import com.example.ie_um.community.api.dto.request.CommunityUpdateReqDto;
+import com.example.ie_um.community.api.dto.request.CommunityReqDto;
 import com.example.ie_um.community.api.dto.response.CommunityInfoResDto;
 import com.example.ie_um.community.api.dto.response.CommunityListResDto;
 import com.example.ie_um.community.domain.Community;
@@ -12,15 +11,14 @@ import com.example.ie_um.community.exception.CommunityInvalidException;
 import com.example.ie_um.community.exception.CommunityLikeNotFoundException;
 import com.example.ie_um.community.exception.CommunityNotFoundException;
 import com.example.ie_um.member.domain.Member;
+import com.example.ie_um.member.domain.repository.MemberRepository;
 import com.example.ie_um.member.exception.MemberNotFoundException;
-import com.example.ie_um.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +29,12 @@ public class CommunityService {
     private final CommunityLikeRepository communityLikeRepository;
 
     @Transactional
-    public void create(Long memberId, CommunityCreateReqDto dto) {
+    public void create(Long memberId, CommunityReqDto communityReqDto) {
         Member member = findMemberById(memberId);
         Community community = Community.builder()
-                .title(dto.title())
-                .content(dto.content())
-                .address(dto.address())
+                .title(communityReqDto.title())
+                .content(communityReqDto.content())
+                .address(communityReqDto.address())
                 .member(member)
                 .likeCount(0)
                 .build();
@@ -52,7 +50,6 @@ public class CommunityService {
 
     public CommunityListResDto getAll(Long memberId) {
         List<Community> communities = communityRepository.findAll();
-
         return getCommunityListResDto(communities, memberId);
     }
 
@@ -62,9 +59,9 @@ public class CommunityService {
     }
 
     public CommunityListResDto getByLike(Long memberId) {
-        List<CommunityLike> likes = communityLikeRepository.findByMemberIdWithCommunity(memberId);
+        List<CommunityLike> communityLikesikes = communityLikeRepository.findByMemberIdWithCommunity(memberId);
 
-        List<Community> communities = likes.stream()
+        List<Community> communities = communityLikesikes.stream()
                 .map(CommunityLike::getCommunity)
                 .toList();
 
@@ -72,9 +69,12 @@ public class CommunityService {
     }
 
     @Transactional
-    public void update(Long memberId, Long communityId, CommunityUpdateReqDto dto) {
+    public void update(Long memberId, Long communityId, CommunityReqDto communityReqDto) {
         Community community = validateOwner(memberId, communityId);
-        community.update(dto.title(), dto.content(), dto.address());
+        community.update(
+                communityReqDto.title(),
+                communityReqDto.content(),
+                communityReqDto.address());
     }
 
     @Transactional
@@ -88,7 +88,7 @@ public class CommunityService {
     @Transactional
     public void saveLike(Long memberId, Long communityId) {
         if (communityLikeRepository.findByMemberIdAndCommunityId(memberId, communityId).isPresent()) {
-            return;
+            throw new CommunityInvalidException("이미 좋아요를 누른 게시물입니다.");
         }
 
         Member member = findMemberById(memberId);
@@ -98,7 +98,6 @@ public class CommunityService {
                 .member(member)
                 .community(community)
                 .build();
-
 
         community.increasedLikeCount();
         communityLikeRepository.save(communityLike);

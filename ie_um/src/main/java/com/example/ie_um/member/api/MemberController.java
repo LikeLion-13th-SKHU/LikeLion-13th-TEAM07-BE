@@ -9,12 +9,16 @@ import com.example.ie_um.member.application.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,11 +35,10 @@ public class MemberController {
     )
     @GetMapping
     public RspTemplate<MemberInfoResDto> getInfo(@Parameter(hidden = true) @AuthenticatedId Long currentMemberId) {
-        MemberInfoResDto memberInfo = memberService.getInfo(currentMemberId);
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자 프로필 정보가 성공적으로 조회되었습니다.",
-                memberInfo
+                memberService.getInfo(currentMemberId)
         );
     }
 
@@ -44,12 +47,9 @@ public class MemberController {
             description = "로그인 된 사용자의 프로필 정보를 수정합니다."
     )
     @PutMapping
-    public RspTemplate<String> update(
-            @Parameter(hidden = true) @AuthenticatedId Long currentMemberId,
-            @RequestBody MemberUpdateReqDto updateReqDto) {
-
+    public RspTemplate<String> update(@Parameter(hidden = true) @AuthenticatedId Long currentMemberId,
+                                      @RequestBody MemberUpdateReqDto updateReqDto) {
         memberService.update(currentMemberId, updateReqDto);
-
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "사용자 프로필 정보가 성공적으로 수정되었습니다."

@@ -8,21 +8,18 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.filter.GenericFilterBean;
-import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
 public class LoginCheckFilter extends GenericFilterBean {
 
     private static final String[] whiteList = {
-            "*", // 일단 다 열어둠
-//            "/",
-//            "/api/v1/oauth2/login/**",
-//            "/api/v1/oauth2/callback/**"
+            "*",
     };
 
     private final JwtProvider jwtProvider;
@@ -43,7 +40,6 @@ public class LoginCheckFilter extends GenericFilterBean {
                     httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                     return;
                 }
-                // 토큰이 유효한 경우 사용자 정보를 로그로 출력
 
                 String email = jwtProvider.extractEmailFromToken(token);
                 Long userId = jwtProvider.extractUserIdFromToken(token);
@@ -62,7 +58,7 @@ public class LoginCheckFilter extends GenericFilterBean {
     }
 
     private boolean isLoginCheckPath(String requestURI) {
-        return PatternMatchUtils.simpleMatch(whiteList, requestURI); // 화이트리스트에 있는 경로는 true 반환
+        return PatternMatchUtils.simpleMatch(whiteList, requestURI);
     }
 
     private String resolveToken(HttpServletRequest request) {

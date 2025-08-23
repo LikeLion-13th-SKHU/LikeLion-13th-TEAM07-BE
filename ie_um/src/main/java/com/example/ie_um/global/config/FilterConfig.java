@@ -17,8 +17,8 @@ public class FilterConfig {
     public FilterRegistrationBean<LogFilter> logFilter() {
         FilterRegistrationBean<LogFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new LogFilter());
-        registrationBean.setOrder(1); // 필터 실행 순서(우선순위) 지정 - 낮을 수록 먼저 실행
-        registrationBean.addUrlPatterns("/*"); // 모든 요청에 적용
+        registrationBean.setOrder(1);
+        registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
 
@@ -26,7 +26,7 @@ public class FilterConfig {
     public FilterRegistrationBean<LoginCheckFilter> loginCheckFilter() {
         FilterRegistrationBean<LoginCheckFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new LoginCheckFilter(jwtProvider));
-        registrationBean.addUrlPatterns("/api/**"); // 필터를 적용할 URL 패턴
+        registrationBean.addUrlPatterns("/api/**");
         registrationBean.setOrder(2);
         return registrationBean;
     }

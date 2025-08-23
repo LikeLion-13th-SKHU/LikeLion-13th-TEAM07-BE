@@ -1,36 +1,37 @@
 package com.example.ie_um.resource.application;
 
-import com.example.ie_um.resource.AiServiceException;
 import com.example.ie_um.resource.api.dto.request.HashTagReqDto;
 import com.example.ie_um.resource.api.dto.response.AiApiResponse;
 import com.example.ie_um.resource.api.dto.response.ResourceListResDto;
+import com.example.ie_um.resource.exception.AiServiceException;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
     private final WebClient webClient;
+
     public Mono<ResourceListResDto> forwardHashtags(HashTagReqDto request) {
         return webClient.post()
                 .uri("/api/recommend")
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                resp -> resp.bodyToMono(String.class).flatMap(body -> Mono.error(new AiServiceException("클라이언트 오류: " + body))))
+                        resp -> resp.bodyToMono(String.class)
+                                .flatMap(body -> Mono.error(new AiServiceException("클라이언트 오류: " + body))))
                 .onStatus(HttpStatusCode::is5xxServerError,
-                        resp -> resp.bodyToMono(String.class).flatMap(body -> Mono.error(new AiServiceException("서버 오류: " + body))))
+                        resp -> resp.bodyToMono(String.class)
+                                .flatMap(body -> Mono.error(new AiServiceException("서버 오류: " + body))))
                 .bodyToMono(AiApiResponse.class)
-                .timeout(Duration.ofSeconds(10)) // 10초 이상 걸리면 에러
+                .timeout(Duration.ofSeconds(10))
 
                 .map(aiResponse -> {
                     if (aiResponse == null || aiResponse.data() == null) {

@@ -1,7 +1,6 @@
 package com.example.ie_um.community.api;
 
-import com.example.ie_um.community.api.dto.request.CommunityCreateReqDto;
-import com.example.ie_um.community.api.dto.request.CommunityUpdateReqDto;
+import com.example.ie_um.community.api.dto.request.CommunityReqDto;
 import com.example.ie_um.community.api.dto.response.CommunityInfoResDto;
 import com.example.ie_um.community.api.dto.response.CommunityListResDto;
 import com.example.ie_um.community.application.CommunityService;
@@ -15,7 +14,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,8 +36,8 @@ public class CommunityController {
     )
     @PostMapping
     public RspTemplate<String> create(@Parameter(hidden = true) @AuthenticatedId Long memberId,
-                                      @RequestBody CommunityCreateReqDto dto) {
-        communityService.create(memberId, dto);
+                                      @RequestBody CommunityReqDto communityReqDto) {
+        communityService.create(memberId, communityReqDto);
         return new RspTemplate<>(
                 HttpStatus.CREATED,
                 "커뮤니티가 성공적으로 생성되었습니다."
@@ -45,7 +51,7 @@ public class CommunityController {
     @ApiResponse(
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation =  CommunityInfoResDto.class)
+                    schema = @Schema(implementation = CommunityInfoResDto.class)
             )
     )
     @GetMapping("/{communityId}")
@@ -65,7 +71,7 @@ public class CommunityController {
     @ApiResponse(
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation =  CommunityListResDto.class)
+                    schema = @Schema(implementation = CommunityListResDto.class)
             )
     )
     @GetMapping
@@ -84,7 +90,7 @@ public class CommunityController {
     @ApiResponse(
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation =  CommunityListResDto.class)
+                    schema = @Schema(implementation = CommunityListResDto.class)
             )
     )
     @GetMapping("/member")
@@ -115,9 +121,9 @@ public class CommunityController {
     )
     @PutMapping("/{communityId}")
     public RspTemplate<String> update(@Parameter(hidden = true) @AuthenticatedId Long memberId,
-                                    @PathVariable(value = "communityId") Long communityId,
-                                    @RequestBody CommunityUpdateReqDto dto) {
-        communityService.update(memberId, communityId, dto);
+                                      @PathVariable(value = "communityId") Long communityId,
+                                      @RequestBody CommunityReqDto communityReqDto) {
+        communityService.update(memberId, communityId, communityReqDto);
         return new RspTemplate<>(
                 HttpStatus.OK,
                 "커뮤니티가 성공적으로 수정되었습니다."

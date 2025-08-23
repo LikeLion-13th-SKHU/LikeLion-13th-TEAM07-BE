@@ -1,14 +1,14 @@
 package com.example.ie_um.auth.application;
 
-import com.example.ie_um.auth.userInfo.KakaoUserInfo;
-import com.example.ie_um.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import com.example.ie_um.auth.userInfo.UserInfo;
 import com.example.ie_um.auth.client.KakaoOAuthClient;
 import com.example.ie_um.auth.exception.OAuthLoginFailedException;
+import com.example.ie_um.auth.userInfo.KakaoUserInfo;
+import com.example.ie_um.auth.userInfo.UserInfo;
 import com.example.ie_um.global.jwt.JwtProvider;
 import com.example.ie_um.global.jwt.dto.TokenDto;
 import com.example.ie_um.member.domain.Member;
+import com.example.ie_um.member.domain.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

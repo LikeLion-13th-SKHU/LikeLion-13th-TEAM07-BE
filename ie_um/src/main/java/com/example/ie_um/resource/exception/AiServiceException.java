@@ -1,4 +1,4 @@
-package com.example.ie_um.resource;
+package com.example.ie_um.resource.exception;
 
 import com.example.ie_um.global.error.exception.BusinessException;
 

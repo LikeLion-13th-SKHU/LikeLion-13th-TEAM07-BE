@@ -1,7 +1,7 @@
-package com.example.ie_um.member.repository;
+package com.example.ie_um.member.domain.repository;
 
-import java.util.Optional;
 import com.example.ie_um.member.domain.Member;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {

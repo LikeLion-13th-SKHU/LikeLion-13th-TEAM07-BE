@@ -3,9 +3,7 @@ package com.example.ie_um.global.annotation.resolver;
 import com.example.ie_um.global.annotation.AuthenticatedId;
 import com.example.ie_um.global.annotation.exception.UnauthorizedException;
 import com.example.ie_um.global.jwt.JwtProvider;
-import com.example.ie_um.member.domain.Member;
-import com.example.ie_um.member.exception.MemberNotFoundException;
-import com.example.ie_um.member.repository.MemberRepository;
+import com.example.ie_um.member.domain.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
 
 @Slf4j
 @Component
@@ -47,12 +44,11 @@ public class AuthenticatedIdResolver implements HandlerMethodArgumentResolver {
         }
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        // JWT 토큰에서 userId를 직접 추출 (DB 조회 불필요)
         Long userId = jwtProvider.extractUserIdFromToken(token);
 
         if (userId == null) {
             throw new UnauthorizedException("유효하지 않은 토큰입니다: 사용자 ID 정보를 찾을 수 없습니다.");
         }
-        return userId; // userId (Long) 반환
+        return userId;
     }
 }
