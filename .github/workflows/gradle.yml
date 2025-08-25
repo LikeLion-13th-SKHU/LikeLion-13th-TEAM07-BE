@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Java CI with Gradle and Deploy
 
 on:
   push:
@@ -19,17 +19,30 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./LikeLion-13th-TEAM07-BE/gradlew
 
-      - name: Build with Gradle
+      # 1. 테스트 실행을 위한 application.yml 설정
+      - name: Set up application.yml for test
+        run: |
+          mkdir -p ./LikeLion-13th-TEAM07-BE/src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" > ./LikeLion-13th-TEAM07-BE/src/main/resources/application.yml
+        shell: bash
+
+      # 2. 올바른 경로에서 gradlew 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
         working-directory: ./LikeLion-13th-TEAM07-BE
+
+      # 3. 올바른 경로에서 Gradle 빌드 실행
+      - name: Build with Gradle
         run: ./gradlew clean build
+        working-directory: ./LikeLion-13th-TEAM07-BE
+
+      # 4. 올바른 경로의 빌드 결과물을 아티팩트로 업로드
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cicdsample
-          path: build/libs/*.jar
+          name: cicdsample-jar
+          path: ./LikeLion-13th-TEAM07-BE/build/libs/*.jar
 
   deploy:
     needs: build
@@ -38,18 +51,33 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: cicdsample
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.4
+          name: cicdsample-jar
+
+      # 5. appleboy/ssh-action을 사용하여 배포 (더 안정적)
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Add remote server to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-      - name: SCP transfer
-        run: scp cicdsample/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/cicd
-      - name: Execute remote commands
-        run: |
-          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo fuser -k 8080/tcp || true"
-          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo nohup /home/shane/.sdkman/candidates/java/current/bin/java -jar ~/cicd/*.jar  > ~/cicd/nohup.log 2>&1 &"
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # 서버에 배포 디렉토리가 없으면 생성
+            mkdir -p ~/cicd
+            
+            # 다운로드 받은 JAR 파일을 서버로 복사 (이 액션은 자동으로 파일을 복사)
+            # scp *.jar ~/cicd/
+            # * 주의: appleboy/ssh-action은 source/target 옵션을 사용하거나, 
+            #   위처럼 script 내에서 scp를 직접 실행할 수 있습니다.
+            #   여기서는 아래 scp 명령어를 직접 실행하는 방식을 보여드립니다.
+            scp *.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/cicd/
+            
+            # 기존에 실행 중인 프로세스 종료 (sudo 없이)
+            PID=$(lsof -t -i:8080)
+            if [ -n "$PID" ]; then
+              kill -9 $PID
+            fi
+            
+            # 새 JAR 파일 백그라운드로 실행 (sudo 없이)
+            # 서버의 PATH에 java가 설정되어 있다고 가정
+            nohup java -jar ~/cicd/*.jar > ~/cicd/app.log 2>&1 &
