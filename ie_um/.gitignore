@@ -38,3 +38,7 @@ out/
 
 ### application-prod.yml ###
 **-prod.yml
+**-local.yml
+
+### GCS ###
+**/resources/**.json
