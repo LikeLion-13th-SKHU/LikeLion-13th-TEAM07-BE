@@ -4,13 +4,10 @@ import java.util.List;
 
 public record AccompanyApplyListResDto(
         Long accompanyId,
-        String role,
-        List<AccompanyApplyResDto> accompanyApplyResDtos
+        List<AccompanyApplyResDto> applicants
 ) {
-    public static AccompanyApplyListResDto of(Long accompanyId, String role, List<AccompanyApplyResDto> accompanyApplyResDto) {
-        return new AccompanyApplyListResDto(
-                accompanyId,
-                role,
-                accompanyApplyResDto);
+    // 인자를 2개만 받는 of 메서드
+    public static AccompanyApplyListResDto of(Long accompanyId, List<AccompanyApplyResDto> applicants) {
+        return new AccompanyApplyListResDto(accompanyId, applicants);
     }
 }

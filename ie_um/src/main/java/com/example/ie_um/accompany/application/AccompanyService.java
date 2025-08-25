@@ -89,17 +89,15 @@ public class AccompanyService {
 
     public AccompanyApplyListResDto getAppliedMember(Long ownerId, Long accompanyId) {
         validateOwner(ownerId, accompanyId);
-        List<AccompanyMember> accompanyMembers = accompanyMemberRepository
+
+        List<AccompanyMember> applicants = accompanyMemberRepository
                 .findByAccompanyIdAndRoleWithMember(accompanyId, AccompanyRole.PENDING);
 
-        AccompanyMember accompanyMember = accompanyMemberRepository.findByMemberIdAndAccompanyId(ownerId, accompanyId)
-                .orElseThrow(() -> new AccompanyInvalidGroupException("참여자가 아닙니다."));
-
-        List<AccompanyApplyResDto> applicantInfos = accompanyMembers.stream()
+        List<AccompanyApplyResDto> applicantInfos = applicants.stream()
                 .map(AccompanyApplyResDto::from)
                 .toList();
 
-        return AccompanyApplyListResDto.of(accompanyId, accompanyMember.getRole().toString(), applicantInfos);
+        return AccompanyApplyListResDto.of(accompanyId, applicantInfos);
     }
 
     @Transactional
