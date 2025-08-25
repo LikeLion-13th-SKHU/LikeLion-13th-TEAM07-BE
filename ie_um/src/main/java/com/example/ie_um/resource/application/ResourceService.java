@@ -20,6 +20,7 @@ public class ResourceService {
     private final WebClient webClient;
 
     public Mono<ResourceListResDto> forwardHashtags(HashTagReqDto request) {
+        log.info("hashTagReqDto={}", request);
         return webClient.post()
                 .uri("/api/recommend")
                 .bodyValue(request)

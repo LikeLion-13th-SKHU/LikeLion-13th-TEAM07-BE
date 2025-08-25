@@ -219,7 +219,8 @@ public class AccompanyService {
         Map<Long, String> userRoleMap = userMemberships.stream()
                 .collect(Collectors.toMap(
                         am -> am.getAccompany().getId(),
-                        am -> am.getRole().name()
+                        am -> am.getRole().name(),
+                        (existingValue, newValue) -> existingValue
                 ));
 
         List<AccompanyInfoResDto> accompanyInfoDtos = accompanyList.stream()
